@@ -82,4 +82,173 @@
 <body>
   <div class="page">
     <div class="brand-line">IMPRESARIO STRATEGIC</div>
-    <h1 class
+    <h1 class="page-title">Swiss Super League: stadium size vs sell-through</h1>
+    <p class="page-subtitle">Each point is a club. Focus is on structural position, not cosmetic differences.</p>
+
+    <p class="explanatory-text">
+      Horizontal position shows stadium capacity. Vertical position shows average league sell-through as a percentage
+      of capacity. Most clubs form a loose cloud; one club is highlighted to show a large stadium with relatively low
+      utilization.
+    </p>
+
+    <div class="chart-container">
+      <div id="swiss-league-plot"></div>
+    </div>
+  </div>
+
+  <script>
+    // ==============================
+    // CONFIG AREA – CHANGE FOR NEW LEAGUES
+    // ==============================
+
+    const clubNames = [
+      "BSC Young Boys",
+      "FC Basel 1893",
+      "FC St. Gallen 1879",
+      "FC Zurich",
+      "FC Luzern",
+      "Servette FC",
+      "FC Sion",
+      "FC Winterthur",
+      "FC Lausanne-Sport",
+      "Grasshopper Club Zurich",
+      "FC Lugano",
+      "Yverdon Sport FC"
+    ];
+
+    const capacities = [31500, 38512, 20660, 26104, 15680, 30084, 14850, 8700, 12544, 26104, 4900, 4200];
+    const sellThrough = [90.4, 67.9, 87.5, 58.3, 77.0, 33.0, 66.9, 92.7, 55.0, 26.4, 79.2, 65.9];
+
+    // index of focus club (Servette)
+    const highlightIndex = 5;
+    const xMax = 40000;
+
+    // ==============================
+    // DATA TRACES – BOLDER VERSION
+    // ==============================
+
+    const markerColors = clubNames.map((_, i) =>
+      i === highlightIndex ? "#D5C393" : "#07385E"   // gold vs solid royal blue
+    );
+
+    const markerSizes = clubNames.map((_, i) =>
+      i === highlightIndex ? 22 : 14
+    );
+
+    const clubsTrace = {
+      type: "scatter",
+      mode: "markers+text",
+      x: capacities,
+      y: sellThrough,
+      text: clubNames,
+      textposition: "top center",
+      textfont: {
+        family: "Montserrat, sans-serif",
+        size: 13,
+        color: "#1A1A1A"
+      },
+      marker: {
+        color: markerColors,
+        size: markerSizes,
+        line: { color: "#1A1A1A", width: 2 }
+      },
+      hovertemplate:
+        "<b>%{text}</b><br>" +
+        "Capacity: %{x}<br>" +
+        "Sell-through: %{y:.1f}%<extra></extra>"
+    };
+
+    const line100Trace = {
+      type: "scatter",
+      mode: "lines",
+      x: [0, xMax],
+      y: [100, 100],
+      line: {
+        color: "#D5C393",
+        width: 2,
+        dash: "dash"
+      },
+      hoverinfo: "skip",
+      showlegend: false
+    };
+
+    // ==============================
+    // LAYOUT – STRONGER CONTRAST
+    // ==============================
+
+    const layout = {
+      margin: { l: 80, r: 40, t: 40, b: 70 },
+      paper_bgcolor: "rgba(0,0,0,0)",
+      plot_bgcolor: "#FFFFFF",
+      showlegend: false,
+
+      xaxis: {
+        title: {
+          text: "Stadium capacity",
+          font: { family: "Montserrat, sans-serif", size: 14, color: "#1A1A1A" }
+        },
+        tickfont: { family: "Montserrat, sans-serif", size: 12, color: "#333333" },
+        gridcolor: "rgba(0,0,0,0.15)",   // visible gridlines
+        gridwidth: 1,
+        linecolor: "#1A1A1A",
+        linewidth: 1.2,
+        mirror: true,
+        rangemode: "tozero"
+      },
+      yaxis: {
+        title: {
+          text: "Average league sell-through (%)",
+          font: { family: "Montserrat, sans-serif", size: 14, color: "#1A1A1A" }
+        },
+        tickfont: { family: "Montserrat, sans-serif", size: 12, color: "#333333" },
+        gridcolor: "rgba(0,0,0,0.15)",
+        gridwidth: 1,
+        linecolor: "#1A1A1A",
+        linewidth: 1.2,
+        mirror: true,
+        range: [0, 105]
+      },
+
+      annotations: [
+        {
+          x: capacities[highlightIndex],
+          y: sellThrough[highlightIndex],
+          xref: "x",
+          yref: "y",
+          text: "<b>Servette FC</b><br>Large stadium, low utilization",
+          showarrow: true,
+          arrowhead: 3,
+          arrowsize: 1,
+          ax: 40,
+          ay: -10,
+          font: {
+            family: "Montserrat, sans-serif",
+            size: 13,
+            color: "#07385E"
+          },
+          arrowcolor: "#07385E"
+        },
+        {
+          x: xMax,
+          y: 100,
+          xref: "x",
+          yref: "y",
+          text: "100% capacity",
+          showarrow: false,
+          xanchor: "right",
+          yanchor: "bottom",
+          font: {
+            family: "Montserrat, sans-serif",
+            size: 11,
+            color: "#333333"
+          }
+        }
+      ]
+    };
+
+    const config = { responsive: true, displayModeBar: false };
+
+    Plotly.newPlot("swiss-league-plot", [clubsTrace, line100Trace], layout, config);
+  </script>
+</body>
+</html>
