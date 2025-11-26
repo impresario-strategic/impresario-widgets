@@ -2,71 +2,51 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Swiss Super League — Capacity vs Sell-Through</title>
+  <title>Swiss Super League – Capacity vs Sell-Through (Bold Blue)</title>
 
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap"
-    rel="stylesheet"
-  />
-
-  <!-- Plotly CDN -->
+  <!-- Plotly -->
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 
-  <style>
-    :root {
-      --imp-royal-blue: #07385E;
-      --imp-gold: #D5C393;
-      --imp-black: #1A1A1A;
-      --imp-grey: #444444;
-      --imp-light: #F4F4F4;
-      --imp-white: #FFFFFF;
-    }
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
 
+  <style>
     * { box-sizing: border-box; }
 
     body {
-      font-family: "Montserrat", sans-serif;
-      background-color: var(--imp-white);
-      color: var(--imp-black);
-      margin: 0;
-      padding: 36px 45px;
-    }
-
-    .page {
-      max-width: 1080px;
-      margin: 0 auto;
+      margin: 32px 40px;
+      font-family: "Montserrat", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background-color: #FFFFFF;
+      color: #1A1A1A;
     }
 
     .brand-line {
       font-size: 11px;
       letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: var(--imp-gold);
-      margin-bottom: 10px;
+      color: #D5C393;
+      margin-bottom: 8px;
     }
 
     h1 {
+      margin: 0 0 6px 0;
       font-size: 24px;
       font-weight: 600;
-      margin: 0 0 4px 0;
+      color: #07385E; /* NEW — subtle trust anchor */
     }
 
     p.subtitle {
+      margin: 0 0 18px 0;
       font-size: 14px;
-      color: var(--imp-grey);
+      color: #555555;
       max-width: 780px;
-      margin-top: 0;
-      margin-bottom: 20px;
       line-height: 1.45;
     }
 
     hr {
       border: none;
-      border-top: 1px solid rgba(0,0,0,0.10);
-      margin: 22px 0;
+      border-top: 1px solid rgba(0,0,0,0.15);
+      margin: 20px 0;
     }
 
     #swiss-league-plot {
@@ -77,39 +57,35 @@
 </head>
 
 <body>
-  <div class="page">
-    <div class="brand-line">IMPRESARIO STRATEGIC</div>
-    <h1>Swiss Super League: stadium size vs sell-through</h1>
-    <p class="subtitle">
-      Horizontal position shows stadium capacity. Vertical position shows average league sell-through as a
-      percentage of capacity. Most clubs form a loose cloud; one club is highlighted to show a large stadium with
-      relatively low utilization.
-    </p>
+  <div class="brand-line">IMPRESARIO STRATEGIC</div>
+  <h1>Swiss Super League: stadium size vs sell-through</h1>
+  <p class="subtitle">
+    Stadium capacity (horizontal) vs average sell-through (vertical). One club is highlighted to emphasize structural inefficiency.
+  </p>
 
-    <hr />
+  <hr>
 
-    <div id="swiss-league-plot"></div>
-  </div>
+  <div id="swiss-league-plot"></div>
 
   <script>
     const clubNames = [
-      "BSC Young Boys", "FC Basel 1893", "FC St. Gallen 1879", "FC Zurich",
-      "FC Luzern", "Servette FC", "FC Sion", "FC Winterthur",
-      "FC Lausanne-Sport", "Grasshopper Club Zurich",
-      "FC Lugano", "Yverdon Sport FC"
+      "BSC Young Boys","FC Basel 1893","FC St. Gallen 1879","FC Zurich",
+      "FC Luzern","Servette FC","FC Sion","FC Winterthur",
+      "FC Lausanne-Sport","Grasshopper Club Zurich","FC Lugano","Yverdon Sport FC"
     ];
 
-    const capacities   = [31500, 38512, 20660, 26104, 15680, 30084, 14850, 8700, 12544, 26104, 4900, 4200];
-    const sellThrough = [90.4, 67.9, 87.5, 58.3, 77.0, 33.0, 66.9, 92.7, 55.0, 26.4, 79.2, 65.9];
-    const highlightIndex = 5;
-    const xMax = 40000;
+    const capacities   = [31500,38512,20660,26104,15680,30084,14850,8700,12544,26104,4900,4200];
+    const sellThrough = [90.4,67.9,87.5,58.3,77.0,33.0,66.9,92.7,55.0,26.4,79.2,65.9];
+    const highlightIndex = 5; // Servette
 
+    // ==== STRONG BLUE + GOLD ====
     const markerColors = clubNames.map((_, i) =>
-      i === highlightIndex ? varColor("--imp-gold") : varColor("--imp-royal-blue")
+      i === highlightIndex ? "#D5C393" : "#07385E"
     );
-    function varColor(v) { return getComputedStyle(document.documentElement).getPropertyValue(v); }
 
-    const markerSizes  = clubNames.map((_, i) => i === highlightIndex ? 22 : 14);
+    const markerSizes = clubNames.map((_, i) =>
+      i === highlightIndex ? 24 : 16
+    );
 
     const clubsTrace = {
       type: "scatter",
@@ -121,29 +97,31 @@
       textfont: {
         family: "Montserrat, sans-serif",
         size: 13,
-        color: "#1A1A1A"
+        color: "#1A1A1A",
+        weight: 500
       },
       marker: {
         color: markerColors,
         size: markerSizes,
-        line: { color: "#1A1A1A", width: 2 }
+        line: { color: "#1A1A1A", width: 2.5 }
       },
-      hovertemplate: "<b>%{text}</b><br>Capacity: %{x}<br>Sell-through: %{y:.1f}%<extra></extra>"
+      hovertemplate:
+        "<b>%{text}</b><br>Capacity: %{x}<br>Sell-through: %{y:.1f}%<extra></extra>"
     };
 
     const line100Trace = {
       type: "scatter",
       mode: "lines",
-      x: [0, xMax],
+      x: [0, 40000],
       y: [100, 100],
-      line: { color: varColor("--imp-gold"), width: 2, dash: "dash" },
+      line: { color: "#D5C393", width: 2, dash: "dash" },
       hoverinfo: "skip"
     };
 
     const layout = {
       margin: { l: 80, r: 40, t: 30, b: 70 },
-      paper_bgcolor: varColor("--imp-white"),
-      plot_bgcolor: varColor("--imp-white"),
+      plot_bgcolor: "#FFFFFF",
+      paper_bgcolor: "#FFFFFF",
       showlegend: false,
 
       xaxis: {
@@ -153,7 +131,7 @@
         gridcolor: "rgba(0,0,0,0.18)",
         gridwidth: 1,
         linecolor: "#1A1A1A",
-        linewidth: 1.1,
+        linewidth: 1.2,
         mirror: true,
         rangemode: "tozero"
       },
@@ -164,7 +142,7 @@
         gridcolor: "rgba(0,0,0,0.18)",
         gridwidth: 1,
         linecolor: "#1A1A1A",
-        linewidth: 1.1,
+        linewidth: 1.2,
         mirror: true,
         range: [0, 105]
       },
@@ -178,12 +156,18 @@
           arrowhead: 3,
           arrowsize: 1,
           ax: 45, ay: -15,
-          font: { family: "Montserrat, sans-serif", size: 13, color: varColor("--imp-royal-blue") }
+          font: {
+            family: "Montserrat, sans-serif",
+            size: 14,
+            color: "#07385E",
+            weight: 600
+          },
+          arrowcolor: "#07385E"
         }
       ]
     };
 
-    Plotly.newPlot("swiss-league-plot", [clubsTrace, line100Trace], layout, {responsive: true});
+    Plotly.newPlot("swiss-league-plot", [clubsTrace, line100Trace], layout, { responsive: true });
   </script>
 </body>
 </html>
