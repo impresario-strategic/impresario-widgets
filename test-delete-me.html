@@ -32,7 +32,7 @@
       margin: 0 0 6px 0;
       font-size: 24px;
       font-weight: 600;
-      color: #07385E; /* NEW — subtle trust anchor */
+      color: #07385E;
     }
 
     p.subtitle {
@@ -60,7 +60,7 @@
   <div class="brand-line">IMPRESARIO STRATEGIC</div>
   <h1>Swiss Super League: stadium size vs sell-through</h1>
   <p class="subtitle">
-    Stadium capacity (horizontal) vs average sell-through (vertical). One club is highlighted to emphasize structural inefficiency.
+    Stadium capacity (horizontal) vs average sell-through (vertical). One club is highlighted to emphasize structural position.
   </p>
 
   <hr>
@@ -76,7 +76,9 @@
 
     const capacities   = [31500,38512,20660,26104,15680,30084,14850,8700,12544,26104,4900,4200];
     const sellThrough = [90.4,67.9,87.5,58.3,77.0,33.0,66.9,92.7,55.0,26.4,79.2,65.9];
-    const highlightIndex = 5; // Servette
+
+    // focus on Luzern (index 4)
+    const highlightIndex = 4;
 
     // ==== STRONG BLUE + GOLD ====
     const markerColors = clubNames.map((_, i) =>
@@ -151,7 +153,7 @@
         {
           x: capacities[highlightIndex],
           y: sellThrough[highlightIndex],
-          text: "<b>Servette FC</b><br>Large stadium, low utilization",
+          text: "<b>FC Luzern</b><br>Smaller house, solid utilization",
           showarrow: true,
           arrowhead: 3,
           arrowsize: 1,
