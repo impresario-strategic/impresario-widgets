@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Charlotte FC: 2023, 2024 & 2025 Season Attendance Comparison</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        #chartContainer {
+            position: relative;
+            height: 600px;
+            margin-bottom: 30px;
+        }
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .year-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .year-section h3 {
+            margin-top: 0;
+            color: #333;
+            text-align: center;
+        }
+        .year-2023 h3 {
+            color: #0038a8;
+        }
+        .year-2024 h3 {
+            color: #6ecff6;
+        }
+        .year-2025 h3 {
+            color: #231f20;
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+        .input-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        label {
+            font-weight: 600;
+            color: #333;
+        }
+        input[type="number"] {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            width: 150px;
+        }
+        button {
+            background-color: #0038a8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        button:hover {
+            background-color: #002d80;
+        }
+        .highlight-box {
+            background-color: #e3f2fd;
+            border-left: 4px solid #0038a8;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .highlight-box h4 {
+            margin-top: 0;
+            color: #0038a8;
+        }
+        @media (max-width: 1024px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Charlotte FC Season Attendance Comparison: 2023, 2024 & 2025</h1>
+        <p class="subtitle">Three-season attendance analysis at Bank of America Stadium</p>
+        
+        <div class="input-section">
+            <div class="input-group">
+                <label for="capacityInput">Stadium Capacity (typical MLS configuration):</label>
+                <input type="number" id="capacityInput" value="38000" min="30000" max="75000">
+                <button onclick="updateChart()">Update Chart</button>
+            </div>
+        </div>
+
+        <div class="highlight-box" id="summaryBox">
+        </div>
+
+        <div id="chartContainer">
+            <canvas id="comparisonChart"></canvas>
+        </div>
+
+        <div class="comparison-grid">
+            <div class="year-section year-2023" id="stats2023">
+            </div>
+            <div class="year-section year-2024" id="stats2024">
+            </div>
+            <div class="year-section year-2025" id="stats2025">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const matchData2023 = [
+            { match: 1, date: '26 Feb 2023', day: 'Sunday', opponent: 'New England', attendance: 69345, result: '0-1' },
+            { match: 2, date: '11 Mar 2023', day: 'Saturday', opponent: 'Atlanta', attendance: 31538, result: '0-3' },
+            { match: 3, date: '26 Mar 2023', day: 'Sunday', opponent: 'New York', attendance: 32540, result: '1-1' },
+            { match: 4, date: '16 Apr 2023', day: 'Sunday', opponent: 'Colorado', attendance: 31240, result: '2-2' },
+            { match: 5, date: '23 Apr 2023', day: 'Sunday', opponent: 'Columbus', attendance: 30468, result: '1-0' },
+            { match: 6, date: '07 May 2023', day: 'Sunday', opponent: 'New York City', attendance: 30454, result: '3-2' },
+            { match: 7, date: '18 May 2023', day: 'Thursday', opponent: 'Chicago', attendance: 29016, result: '2-1' },
+            { match: 8, date: '21 May 2023', day: 'Sunday', opponent: 'Nashville', attendance: 30526, result: '1-2' },
+            { match: 9, date: '11 Jun 2023', day: 'Sunday', opponent: 'Seattle', attendance: 31563, result: '3-3' },
+            { match: 10, date: '25 Jun 2023', day: 'Sunday', opponent: 'Montréal', attendance: 31515, result: '0-0' },
+            { match: 11, date: '09 Jul 2023', day: 'Sunday', opponent: 'Cincinnati', attendance: 43613, result: '2-2' },
+            { match: 12, date: '27 Aug 2023', day: 'Sunday', opponent: 'LAFC', attendance: 37809, result: '2-1' },
+            { match: 13, date: '31 Aug 2023', day: 'Thursday', opponent: 'Orlando', attendance: 27236, result: '1-1' },
+            { match: 14, date: '17 Sep 2023', day: 'Sunday', opponent: 'D.C. United', attendance: 36101, result: '0-0' },
+            { match: 15, date: '21 Sep 2023', day: 'Thursday', opponent: 'Philadelphia', attendance: 28584, result: '2-2' },
+            { match: 16, date: '05 Oct 2023', day: 'Thursday', opponent: 'Toronto', attendance: 30080, result: '3-0' },
+            { match: 17, date: '22 Oct 2023', day: 'Sunday', opponent: 'Miami', attendance: 66101, result: '1-0' }
+        ];
+
+        const matchData2024 = [
+            { match: 1, date: '25 Feb 2024', day: 'Sunday', opponent: 'New York City', attendance: 62291, result: '1-0' },
+            { match: 2, date: '24 Mar 2024', day: 'Sunday', opponent: 'Columbus', attendance: 36245, result: '2-0' },
+            { match: 3, date: '31 Mar 2024', day: 'Sunday', opponent: 'Cincinnati', attendance: 30043, result: '1-1' },
+            { match: 4, date: '14 Apr 2024', day: 'Sunday', opponent: 'Toronto', attendance: 30622, result: '3-2' },
+            { match: 5, date: '22 Apr 2024', day: 'Monday', opponent: 'Minnesota', attendance: 27021, result: '0-3' },
+            { match: 6, date: '05 May 2024', day: 'Sunday', opponent: 'Portland', attendance: 27495, result: '2-0' },
+            { match: 7, date: '12 May 2024', day: 'Sunday', opponent: 'Nashville', attendance: 36319, result: '1-0' },
+            { match: 8, date: '19 May 2024', day: 'Sunday', opponent: 'LA Galaxy', attendance: 29099, result: '0-0' },
+            { match: 9, date: '26 May 2024', day: 'Sunday', opponent: 'Philadelphia', attendance: 32232, result: '0-0' },
+            { match: 10, date: '16 Jun 2024', day: 'Sunday', opponent: 'D.C. United', attendance: 33322, result: '1-0' },
+            { match: 11, date: '20 Jun 2024', day: 'Thursday', opponent: 'Orlando', attendance: 28301, result: '2-2' },
+            { match: 12, date: '04 Jul 2024', day: 'Thursday', opponent: 'Miami', attendance: 47218, result: '1-2' },
+            { match: 13, date: '25 Aug 2024', day: 'Sunday', opponent: 'New York', attendance: 31320, result: '1-1' },
+            { match: 14, date: '01 Sep 2024', day: 'Sunday', opponent: 'Atlanta', attendance: 58435, result: '0-1' },
+            { match: 15, date: '22 Sep 2024', day: 'Sunday', opponent: 'New England', attendance: 30662, result: '4-0' },
+            { match: 16, date: '03 Oct 2024', day: 'Thursday', opponent: 'Chicago', attendance: 26899, result: '4-3' },
+            { match: 17, date: '06 Oct 2024', day: 'Sunday', opponent: 'Montréal', attendance: 38259, result: '2-0' }
+        ];
+
+        const matchData2025 = [
+            { match: 1, date: '01 Mar 2025', day: 'Saturday', opponent: 'Atlanta', attendance: 51002, result: '2-0' },
+            { match: 2, date: '16 Mar 2025', day: 'Sunday', opponent: 'Cincinnati', attendance: 27807, result: '2-0' },
+            { match: 3, date: '23 Mar 2025', day: 'Sunday', opponent: 'SJ Earthquakes', attendance: 27463, result: '4-1' },
+            { match: 4, date: '05 Apr 2025', day: 'Saturday', opponent: 'Nashville', attendance: 29591, result: '2-1' },
+            { match: 5, date: '20 Apr 2025', day: 'Sunday', opponent: 'San Diego', attendance: 29663, result: '3-0' },
+            { match: 6, date: '27 Apr 2025', day: 'Sunday', opponent: 'New England', attendance: 29233, result: '0-1' },
+            { match: 7, date: '18 May 2025', day: 'Sunday', opponent: 'Chicago', attendance: 29755, result: '1-4' },
+            { match: 8, date: '25 May 2025', day: 'Sunday', opponent: 'Columbus', attendance: 29296, result: '3-2' },
+            { match: 9, date: '06 Jul 2025', day: 'Sunday', opponent: 'Orlando', attendance: 28734, result: '2-2' },
+            { match: 10, date: '13 Jul 2025', day: 'Sunday', opponent: 'New York City', attendance: 28164, result: '2-0' },
+            { match: 11, date: '17 Jul 2025', day: 'Thursday', opponent: 'D.C. United', attendance: 32293, result: '2-1' },
+            { match: 12, date: '27 Jul 2025', day: 'Sunday', opponent: 'Toronto', attendance: 27835, result: '2-0' },
+            { match: 13, date: '17 Aug 2025', day: 'Sunday', opponent: 'Salt Lake', attendance: 28201, result: '1-0' },
+            { match: 14, date: '25 Aug 2025', day: 'Monday', opponent: 'New York', attendance: 26606, result: '1-0' },
+            { match: 15, date: '14 Sep 2025', day: 'Sunday', opponent: 'Miami', attendance: 35607, result: '3-0' },
+            { match: 16, date: '28 Sep 2025', day: 'Sunday', opponent: 'Montréal', attendance: 28841, result: '1-4' },
+            { match: 17, date: '19 Oct 2025', day: 'Sunday', opponent: 'Philadelphia', attendance: 31191, result: '2-0' }
+        ];
+
+        let chart;
+        let capacity = 38000;
+
+        function calculateLinearTrendline(data) {
+            const n = data.length;
+            let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+            
+            for (let i = 0; i < n; i++) {
+                const x = i + 1;
+                const y = data[i];
+                sumX += x;
+                sumY += y;
+                sumXY += x * y;
+                sumX2 += x * x;
+            }
+            
+            const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+            const intercept = (sumY - slope * sumX) / n;
+            
+            return data.map((_, i) => slope * (i + 1) + intercept);
+        }
+
+        function updateStats(capacity) {
+            const seasons = [
+                { data: matchData2023, id: 'stats2023', year: '2023' },
+                { data: matchData2024, id: 'stats2024', year: '2024' },
+                { data: matchData2025, id: 'stats2025', year: '2025' }
+            ];
+
+            seasons.forEach(season => {
+                const attendances = season.data.map(m => m.attendance);
+                const total = attendances.reduce((a, b) => a + b, 0);
+                const average = Math.round(total / attendances.length);
+                const highest = Math.max(...attendances);
+                const lowest = Math.min(...attendances);
+                const capacityPct = ((average / capacity) * 100).toFixed(1);
+
+                const statsHtml = `
+                    <h3>${season.year}</h3>
+                    <div class="stat-row">
+                        <span>Matches:</span>
+                        <strong>${season.data.length}</strong>
+                    </div>
+                    <div class="stat-row">
+                        <span>Total Attendance:</span>
+                        <strong>${total.toLocaleString()}</strong>
+                    </div>
+                    <div class="stat-row">
+                        <span>Average:</span>
+                        <strong>${average.toLocaleString()}</strong>
+                    </div>
+                    <div class="stat-row">
+                        <span>Capacity %:</span>
+                        <strong>${capacityPct}%</strong>
+                    </div>
+                    <div class="stat-row">
+                        <span>Highest:</span>
+                        <strong>${highest.toLocaleString()}</strong>
+                    </div>
+                    <div class="stat-row">
+                        <span>Lowest:</span>
+                        <strong>${lowest.toLocaleString()}</strong>
+                    </div>
+                `;
+                
+                document.getElementById(season.id).innerHTML = statsHtml;
+            });
+        }
+
+        function updateSummary(capacity) {
+            const avg2023 = Math.round(matchData2023.reduce((a, b) => a + b.attendance, 0) / matchData2023.length);
+            const avg2024 = Math.round(matchData2024.reduce((a, b) => a + b.attendance, 0) / matchData2024.length);
+            const avg2025 = Math.round(matchData2025.reduce((a, b) => a + b.attendance, 0) / matchData2025.length);
+
+            const change2324 = avg2024 - avg2023;
+            const changePct2324 = ((change2324 / avg2023) * 100).toFixed(1);
+            const change2425 = avg2025 - avg2024;
+            const changePct2425 = ((change2425 / avg2024) * 100).toFixed(1);
+            
+            const summaryHtml = `
+                <h4>Three-Season Summary</h4>
+                <p><strong>2023 Average:</strong> ${avg2023.toLocaleString()} (${((avg2023/capacity)*100).toFixed(1)}% capacity)</p>
+                <p><strong>2024 Average:</strong> ${avg2024.toLocaleString()} (${((avg2024/capacity)*100).toFixed(1)}% capacity) 
+                   - <span style="color: ${change2324 >= 0 ? '#28a745' : '#dc3545'}; font-weight: bold;">${change2324 >= 0 ? '+' : ''}${change2324.toLocaleString()} (${changePct2324}%)</span></p>
+                <p><strong>2025 Average:</strong> ${avg2025.toLocaleString()} (${((avg2025/capacity)*100).toFixed(1)}% capacity) 
+                   - <span style="color: ${change2425 >= 0 ? '#28a745' : '#dc3545'}; font-weight: bold;">${change2425 >= 0 ? '+' : ''}${change2425.toLocaleString()} (${changePct2425}%)</span></p>
+                <p><em>Note: Charlotte FC regularly opens additional capacity for high-profile matches, particularly against Inter Miami and Atlanta United.</em></p>
+            `;
+            
+            document.getElementById('summaryBox').innerHTML = summaryHtml;
+        }
+
+        function createChart(capacity) {
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            
+            if (chart) {
+                chart.destroy();
+            }
+
+            const attendances2023 = matchData2023.map(m => m.attendance);
+            const attendances2024 = matchData2024.map(m => m.attendance);
+            const attendances2025 = matchData2025.map(m => m.attendance);
+
+            const trendline2023 = calculateLinearTrendline(attendances2023);
+            const trendline2024 = calculateLinearTrendline(attendances2024);
+            const trendline2025 = calculateLinearTrendline(attendances2025);
+
+            const labels = Array.from({length: 17}, (_, i) => `Match ${i + 1}`);
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '2023 Attendance',
+                        data: attendances2023,
+                        borderColor: '#0038a8',
+                        backgroundColor: 'rgba(0, 56, 168, 0.1)',
+                        borderWidth: 3,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: '#0038a8',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        tension: 0.3,
+                        fill: false
+                    }, {
+                        label: '2023 Trendline',
+                        data: trendline2023,
+                        borderColor: '#0038a8',
+                        borderWidth: 2,
+                        borderDash: [10, 5],
+                        pointRadius: 0,
+                        pointHoverRadius: 0,
+                        tension: 0,
+                        fill: false
+                    }, {
+                        label: '2024 Attendance',
+                        data: attendances2024,
+                        borderColor: '#6ecff6',
+                        backgroundColor: 'rgba(110, 207, 246, 0.1)',
+                        borderWidth: 3,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: '#6ecff6',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        tension: 0.3,
+                        fill: false
+                    }, {
+                        label: '2024 Trendline',
+                        data: trendline2024,
+                        borderColor: '#6ecff6',
+                        borderWidth: 2,
+                        borderDash: [10, 5],
+                        pointRadius: 0,
+                        pointHoverRadius: 0,
+                        tension: 0,
+                        fill: false
+                    }, {
+                        label: '2025 Attendance',
+                        data: attendances2025,
+                        borderColor: '#231f20',
+                        backgroundColor: 'rgba(35, 31, 32, 0.1)',
+                        borderWidth: 3,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: '#231f20',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        tension: 0.3,
+                        fill: false
+                    }, {
+                        label: '2025 Trendline',
+                        data: trendline2025,
+                        borderColor: '#231f20',
+                        borderWidth: 2,
+                        borderDash: [10, 5],
+                        pointRadius: 0,
+                        pointHoverRadius: 0,
+                        tension: 0,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20,
+                                font: { size: 13 }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleFont: { size: 14, weight: 'bold' },
+                            bodyFont: { size: 13 },
+                            filter: function(tooltipItem) {
+                                return tooltipItem.datasetIndex === 0 || tooltipItem.datasetIndex === 2 || tooltipItem.datasetIndex === 4;
+                            },
+                            callbacks: {
+                                title: function(context) {
+                                    const datasetIndex = context[0].datasetIndex;
+                                    const matchIndex = context[0].dataIndex;
+                                    let matchData;
+                                    if (datasetIndex === 0) matchData = matchData2023[matchIndex];
+                                    else if (datasetIndex === 2) matchData = matchData2024[matchIndex];
+                                    else if (datasetIndex === 4) matchData = matchData2025[matchIndex];
+                                    
+                                    if (matchData) {
+                                        return `Match ${matchData.match}: vs ${matchData.opponent}`;
+                                    }
+                                    return '';
+                                },
+                                label: function(context) {
+                                    const datasetIndex = context.datasetIndex;
+                                    const matchIndex = context.dataIndex;
+                                    let matchData, year;
+                                    if (datasetIndex === 0) {
+                                        matchData = matchData2023[matchIndex];
+                                        year = '2023';
+                                    } else if (datasetIndex === 2) {
+                                        matchData = matchData2024[matchIndex];
+                                        year = '2024';
+                                    } else if (datasetIndex === 4) {
+                                        matchData = matchData2025[matchIndex];
+                                        year = '2025';
+                                    }
+                                    
+                                    if (matchData) {
+                                        const pct = ((matchData.attendance / capacity) * 100).toFixed(1);
+                                        return [
+                                            `Season: ${year}`,
+                                            `Date: ${matchData.date} (${matchData.day})`,
+                                            `Attendance: ${matchData.attendance.toLocaleString()}`,
+                                            `Capacity: ${pct}%`,
+                                            `Result: ${matchData.result}`
+                                        ];
+                                    }
+                                    return '';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 75000,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                },
+                plugins: [{
+                    id: 'capacityLine',
+                    beforeDraw: function(chart) {
+                        const ctx = chart.ctx;
+                        const yAxis = chart.scales.y;
+                        const xAxis = chart.scales.x;
+                        const yCapacity = yAxis.getPixelForValue(capacity);
+
+                        ctx.save();
+                        ctx.strokeStyle = '#dc3545';
+                        ctx.lineWidth = 2;
+                        ctx.setLineDash([]);
+                        ctx.beginPath();
+                        ctx.moveTo(xAxis.left, yCapacity);
+                        ctx.lineTo(xAxis.right, yCapacity);
+                        ctx.stroke();
+                        ctx.fillStyle = '#dc3545';
+                        ctx.font = 'bold 12px Arial';
+                        ctx.fillText(`Capacity: ${capacity.toLocaleString()}`, xAxis.right - 150, yCapacity - 8);
+                        ctx.restore();
+                    }
+                }]
+            });
+        }
+
+        function updateChart() {
+            capacity = parseInt(document.getElementById('capacityInput').value);
+            if (capacity && capacity > 0) {
+                createChart(capacity);
+                updateStats(capacity);
+                updateSummary(capacity);
+            }
+        }
+
+        window.onload = function() {
+            updateChart();
+        };
+    </script>
+</body>
+</html>
