@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>National League Overview | Impresario Strategic</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.27.0/plotly.min.js"></script>
+    <style>
+        * {
+            font-family: 'Montserrat', sans-serif;
+        }
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f8f8;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+        .chart-wrapper {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 24px;
+            position: relative;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        .branding {
+            position: absolute;
+            bottom: 70px;
+            right: 40px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 0.5;
+        }
+        .branding-text {
+            color: #07385E;
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .branding-icon {
+            width: 20px;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="chart-wrapper">
+            <div id="chart"></div>
+            <div class="branding">
+                <svg class="branding-icon" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M50 10 L50 110" stroke="#07385E" stroke-width="4"/>
+                    <path d="M35 25 L35 110" stroke="#07385E" stroke-width="4"/>
+                    <circle cx="50" cy="70" r="35" stroke="#07385E" stroke-width="4" fill="none"/>
+                </svg>
+                <span class="branding-text">Impresario Strategic</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Brand colors
+        const NAVY = '#07385E';
+        const GOLD = '#D5C393';
+        const WHITE = '#FFFFFF';
+        const DARK = '#1A1A1A';
+        const LIGHT_BG = '#FAFAFA';
+        const NAVY_LIGHT = 'rgba(7, 56, 94, 0.08)';
+        const NAVY_MED = 'rgba(7, 56, 94, 0.25)';
+
+        // Club data
+        const clubs = [
+            { name: "Southend United", capacity: 12392, sellThrough: 59.2 },
+            { name: "Oldham Athletic", capacity: 13513, sellThrough: 44.9 },
+            { name: "York City", capacity: 8005, sellThrough: 75.1, comparable: true },
+            { name: "Hartlepool United", capacity: 7691, sellThrough: 48.9, comparable: true },
+            { name: "Yeovil Town", capacity: 9527, sellThrough: 33.7, highlight: true },
+            { name: "Sutton United", capacity: 5013, sellThrough: 52.5 },
+            { name: "Rochdale AFC", capacity: 10249, sellThrough: 23.7 },
+            { name: "Aldershot Town", capacity: 7100, sellThrough: 34.0 },
+            { name: "Woking FC", capacity: 6064, sellThrough: 38.3 },
+            { name: "Barnet FC", capacity: 5176, sellThrough: 44.7 },
+            { name: "Eastleigh FC", capacity: 3000, sellThrough: 74.5 },
+            { name: "Boston United", capacity: 6643, sellThrough: 32.1 },
+            { name: "Altrincham FC", capacity: 6085, sellThrough: 34.3 },
+            { name: "Forest Green Rovers", capacity: 5140, sellThrough: 35.7 },
+            { name: "FC Halifax Town", capacity: 14061, sellThrough: 12.4 },
+            { name: "Dagenham & Redbridge", capacity: 6000, sellThrough: 28.7 },
+            { name: "Wealdstone FC", capacity: 4085, sellThrough: 39.1 },
+            { name: "Ebbsfleet United", capacity: 5011, sellThrough: 29.0 },
+            { name: "Solihull Moors", capacity: 5500, sellThrough: 25.8 },
+            { name: "Gateshead FC", capacity: 11800, sellThrough: 12.0 },
+            { name: "Maidenhead United", capacity: 4000, sellThrough: 34.7 },
+            { name: "AFC Fylde", capacity: 6000, sellThrough: 21.9 },
+            { name: "Tamworth FC", capacity: 4065, sellThrough: 32.1 },
+            { name: "Braintree Town", capacity: 4222, sellThrough: 27.1 }
+        ];
+
+        // Main scatter trace
+        const mainTrace = {
+            x: clubs.map(c => c.capacity),
+            y: clubs.map(c => c.sellThrough),
+            text: clubs.map(c => c.name),
+            mode: 'markers+text',
+            type: 'scatter',
+            name: 'Clubs',
+            showlegend: false,
+            marker: {
+                size: clubs.map(c => c.highlight ? 20 : (c.comparable ? 17 : 12)),
+                color: clubs.map(c => c.highlight ? GOLD : (c.comparable ? WHITE : NAVY)),
+                line: {
+                    color: clubs.map(c => c.highlight ? NAVY : (c.comparable ? NAVY : WHITE)),
+                    width: clubs.map(c => c.highlight ? 2.5 : (c.comparable ? 2.5 : 1.5))
+                }
+            },
+            textposition: 'top right',
+            textfont: {
+                family: 'Montserrat',
+                size: 11,
+                color: 'rgba(26, 26, 26, 0.7)'
+            },
+            hovertemplate: '<b>%{text}</b><br>Capacity: %{x:,}<br>Sell-Through: %{y:.1f}%<extra></extra>'
+        };
+
+        // 100% capacity reference line
+        const capacityLine = {
+            x: [0, 16000],
+            y: [100, 100],
+            mode: 'lines',
+            type: 'scatter',
+            name: '100% Capacity',
+            showlegend: false,
+            line: {
+                color: GOLD,
+                width: 1.5,
+                dash: 'dot'
+            },
+            hoverinfo: 'skip'
+        };
+
+        // Segmentation zones - adjusted for National League
+        const segments = [
+            {
+                name: 'The Pack',
+                x: [4000, 7000, 7000, 4000, 4000],
+                y: [20, 20, 55, 55, 20],
+                labelX: 5500,
+                labelY: 15
+            },
+            {
+                name: 'Yeovil Peers',
+                x: [7000, 10500, 10500, 7000, 7000],
+                y: [30, 30, 80, 80, 30],
+                labelX: 8750,
+                labelY: 83
+            },
+            {
+                name: 'Venue-Attendance<br>Mismatch',
+                x: [10000, 14500, 14500, 10000, 10000],
+                y: [8, 8, 48, 48, 8],
+                labelX: 12250,
+                labelY: 51
+            }
+        ];
+
+        const segmentTraces = [];
+        segments.forEach((seg, i) => {
+            // Zone outline
+            segmentTraces.push({
+                x: seg.x,
+                y: seg.y,
+                mode: 'lines',
+                type: 'scatter',
+                name: seg.name,
+                showlegend: false,
+                visible: true,
+                line: {
+                    color: NAVY_MED,
+                    width: 1.5,
+                    dash: 'dash'
+                },
+                fill: 'toself',
+                fillcolor: NAVY_LIGHT,
+                hoverinfo: 'skip'
+            });
+            // Zone label
+            segmentTraces.push({
+                x: [seg.labelX],
+                y: [seg.labelY],
+                mode: 'text',
+                type: 'scatter',
+                showlegend: false,
+                visible: true,
+                text: [seg.name],
+                textfont: {
+                    family: 'Montserrat',
+                    size: 12,
+                    color: NAVY
+                },
+                hoverinfo: 'skip'
+            });
+        });
+
+        // Combine all traces
+        const data = [mainTrace, capacityLine, ...segmentTraces];
+
+        // Layout
+        const layout = {
+            title: {
+                text: 'National League: Stadium Capacity vs. Sell-Through (2024-25)',
+                font: {
+                    family: 'Montserrat',
+                    size: 22,
+                    color: NAVY
+                },
+                x: 0.5,
+                xanchor: 'center',
+                y: 0.95
+            },
+            xaxis: {
+                title: {
+                    text: 'Stadium Capacity',
+                    font: {
+                        family: 'Montserrat',
+                        size: 14,
+                        color: NAVY
+                    },
+                    standoff: 15
+                },
+                range: [0, 16000],
+                showgrid: true,
+                gridcolor: 'rgba(7, 56, 94, 0.08)',
+                gridwidth: 1,
+                zeroline: false,
+                tickfont: {
+                    family: 'Montserrat',
+                    size: 12,
+                    color: 'rgba(26, 26, 26, 0.6)'
+                },
+                tickformat: ',d',
+                linecolor: 'rgba(7, 56, 94, 0.2)',
+                linewidth: 1
+            },
+            yaxis: {
+                title: {
+                    text: 'Sell-Through (%)',
+                    font: {
+                        family: 'Montserrat',
+                        size: 14,
+                        color: NAVY
+                    },
+                    standoff: 10
+                },
+                range: [0, 105],
+                showgrid: true,
+                gridcolor: 'rgba(7, 56, 94, 0.08)',
+                gridwidth: 1,
+                zeroline: false,
+                tickfont: {
+                    family: 'Montserrat',
+                    size: 12,
+                    color: 'rgba(26, 26, 26, 0.6)'
+                },
+                ticksuffix: '%',
+                linecolor: 'rgba(7, 56, 94, 0.2)',
+                linewidth: 1
+            },
+            plot_bgcolor: WHITE,
+            paper_bgcolor: WHITE,
+            width: 1200,
+            height: 750,
+            margin: {
+                l: 70,
+                r: 40,
+                t: 60,
+                b: 80
+            },
+            hovermode: 'closest',
+            showlegend: false,
+            updatemenus: [{
+                type: 'buttons',
+                direction: 'right',
+                x: 0.5,
+                xanchor: 'center',
+                y: -0.12,
+                yanchor: 'top',
+                pad: { r: 10, t: 10 },
+                showactive: true,
+                bgcolor: WHITE,
+                bordercolor: NAVY,
+                borderwidth: 1,
+                font: {
+                    family: 'Montserrat',
+                    size: 12,
+                    color: NAVY
+                },
+                buttons: [
+                    {
+                        label: '  Show Segments  ',
+                        method: 'update',
+                        args: [{ visible: [true, true, ...Array(segments.length * 2).fill(true)] }]
+                    },
+                    {
+                        label: '  Hide Segments  ',
+                        method: 'update',
+                        args: [{ visible: [true, true, ...Array(segments.length * 2).fill(false)] }]
+                    }
+                ]
+            }]
+        };
+
+        // Config
+        const config = {
+            responsive: true,
+            displayModeBar: true,
+            modeBarButtonsToRemove: ['pan2d', 'select2d', 'lasso2d', 'autoScale2d'],
+            displaylogo: false
+        };
+
+        Plotly.newPlot('chart', data, layout, config);
+    </script>
+</body>
+</html>
