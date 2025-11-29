@@ -3,80 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yeovil Town FC: Season Attendance Comparison | Impresario Strategic</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>Yeovil Town FC: 2023-24, 2024-25 & 2025-26 Season Attendance Comparison</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <style>
-        * { font-family: 'Montserrat', sans-serif; }
-        body { margin: 0; padding: 20px; background-color: #f8f8f8; min-height: 100vh; box-sizing: border-box; }
-        .container { max-width: 1300px; margin: 0 auto; }
-        .chart-wrapper { background-color: #ffffff; border-radius: 8px; padding: 24px; position: relative; box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 20px; }
-        h1 { color: #07385E; text-align: center; margin-bottom: 8px; font-size: 22px; font-weight: 600; }
-        .subtitle { text-align: center; color: rgba(26, 26, 26, 0.6); margin-bottom: 24px; font-size: 14px; }
-        #chartContainer { position: relative; height: 550px; margin-bottom: 20px; }
-        .branding { position: absolute; bottom: 24px; right: 24px; display: flex; align-items: center; gap: 8px; opacity: 0.5; }
-        .branding-text { color: #07385E; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; }
-        .branding-icon { width: 24px; height: 24px; }
-        .comparison-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 20px; }
-        .year-section { background-color: #f8f8f8; padding: 20px; border-radius: 8px; border-left: 4px solid #07385E; }
-        .year-section.year-2023 { border-left-color: #9BB8CA; }
-        .year-section.year-2024 { border-left-color: #4A7BA7; }
-        .year-section.year-2025 { border-left-color: #07385E; }
-        .year-section h3 { margin: 0 0 16px 0; font-size: 14px; font-weight: 600; }
-        .year-section.year-2023 h3 { color: #9BB8CA; }
-        .year-section.year-2024 h3 { color: #4A7BA7; }
-        .year-section.year-2025 h3 { color: #07385E; }
-        .stat-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(7, 56, 94, 0.1); font-size: 13px; color: rgba(26, 26, 26, 0.7); }
-        .stat-row:last-child { border-bottom: none; }
-        .stat-row strong { color: #1A1A1A; }
-        .input-section { background-color: #f8f8f8; padding: 16px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; }
-        .input-section label { font-weight: 500; color: #07385E; font-size: 13px; }
-        .input-section input[type="number"] { padding: 8px 12px; border: 1px solid rgba(7, 56, 94, 0.2); border-radius: 4px; font-size: 14px; width: 100px; font-family: 'Montserrat', sans-serif; }
-        .input-section button { background-color: #07385E; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 500; font-family: 'Montserrat', sans-serif; }
-        .input-section button:hover { background-color: #0a4a7a; }
-        .summary-box { background-color: rgba(213, 195, 147, 0.15); border-left: 4px solid #D5C393; padding: 16px 20px; border-radius: 0 8px 8px 0; margin-bottom: 20px; }
-        .summary-box h4 { margin: 0 0 12px 0; color: #07385E; font-size: 14px; font-weight: 600; }
-        .summary-box p { margin: 0 0 8px 0; font-size: 13px; color: rgba(26, 26, 26, 0.7); line-height: 1.5; }
-        .summary-box p:last-child { margin-bottom: 0; }
-        @media (max-width: 1024px) { .comparison-grid { grid-template-columns: 1fr; } }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        #chartContainer {
+            position: relative;
+            height: 600px;
+            margin-bottom: 30px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-box {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #0066cc;
+        }
+        .stat-value.positive {
+            color: #28a745;
+        }
+        .stat-value.negative {
+            color: #dc3545;
+        }
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .year-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .year-section h3 {
+            margin-top: 0;
+            color: #333;
+            text-align: center;
+        }
+        .year-2023 h3 {
+            color: #9b59b6;
+        }
+        .year-2024 h3 {
+            color: #ff6b6b;
+        }
+        .year-2025 h3 {
+            color: #00703c;
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+        .input-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        label {
+            font-weight: 600;
+            color: #333;
+        }
+        input[type="number"] {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            width: 150px;
+        }
+        button {
+            background-color: #00703c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        button:hover {
+            background-color: #005a30;
+        }
+        .highlight-box {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .highlight-box h4 {
+            margin-top: 0;
+            color: #856404;
+        }
+        @media (max-width: 1024px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="chart-wrapper">
-            <h1>Yeovil Town FC: Season Attendance Comparison</h1>
-            <p class="subtitle">Three-season attendance analysis at Huish Park (2023-24, 2024-25 & 2025-26)</p>
-            
-            <div class="input-section">
+        <h1>Yeovil Town FC Season Attendance Comparison: 2023-24, 2024-25 & 2025-26</h1>
+        <p class="subtitle">Three-season attendance analysis at Huish Park</p>
+        
+        <div class="input-section">
+            <div class="input-group">
                 <label for="capacityInput">Stadium Capacity:</label>
                 <input type="number" id="capacityInput" value="9565" min="5000" max="15000">
-                <button onclick="updateChart()">Update</button>
+                <button onclick="updateChart()">Update Chart</button>
             </div>
+        </div>
 
-            <div class="summary-box" id="summaryBox"></div>
+        <div class="highlight-box" id="summaryBox">
+            <!-- Summary will be inserted here -->
+        </div>
 
-            <div id="chartContainer">
-                <canvas id="comparisonChart"></canvas>
+        <div id="chartContainer">
+            <canvas id="comparisonChart"></canvas>
+        </div>
+
+        <div class="comparison-grid">
+            <div class="year-section year-2023" id="stats2023">
+                <!-- 2023-24 stats will be inserted here -->
             </div>
-
-            <div class="branding">
-                <svg class="branding-icon" viewBox="0 0 25400 25400" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path fill="#07385E" fill-rule="nonzero" d="M14589.56 9160.1c967.54,373.75 1796.66,1026.13 2388.22,1858.26 609.4,857.37 968.01,1904.97 968.01,3035.47 0,1130.38 -358.61,2178.21 -968.13,3035.57 -625.38,879.72 -1516.27,1558.47 -2555.39,1919.56l-330.52 114.87 0 -9611.37c-194.16,-59.39 -394.28,-106.77 -599.29,-141.23 -255.14,-42.92 -520.04,-65.37 -792.46,-65.37 -272.42,0 -537.32,22.45 -792.46,65.37 -205.01,34.46 -405.13,81.84 -599.29,141.23l0 9611.37 -330.5 -114.87c-1039.14,-361.09 -1930.01,-1039.84 -2555.41,-1919.56 -609.52,-857.36 -968.13,-1905.19 -968.13,-3035.57 0,-1130.5 358.61,-2178.1 968.01,-3035.47 591.69,-832.24 1420.7,-1484.49 2388.22,-1858.24l0 -2883.97 3779.12 0 0 248.91 0 2635.04zm-497.81 -164.17l0 -11.99 0 -2209.98 -2783.5 0 0 2209.98 0 11.99c169.66,-46.8 342.39,-85.13 517.69,-114.53 286.42,-48.19 578.82,-73.36 874.06,-73.36 295.24,0 587.64,25.17 874.06,73.36 175.32,29.4 348.03,67.73 517.69,114.53zm2481.58 2310.26c-499.13,-702.29 -1184.58,-1263.01 -1983.77,-1610.1l0 8715.46c799.07,-346.97 1484.52,-907.68 1983.64,-1609.97 550.73,-774.71 874.78-1723.07 874.78-2747.75 0-1024.8 -324.05-1973.05 -874.65-2747.64zm-7746.53 5495.39c499.12,702.29 1184.59,1263 1983.64,1609.97l0 -8715.46c-799.17,347.09 -1484.64,907.81 -1983.75,1610.1 -550.62,774.59 -874.64,1722.84 -874.64,2747.64 0,1024.68 324.02,1973.04 874.75,2747.75z"/>
-                </svg>
-                <span class="branding-text">Impresario Strategic</span>
+            <div class="year-section year-2024" id="stats2024">
+                <!-- 2024-25 stats will be inserted here -->
             </div>
-
-            <div class="comparison-grid">
-                <div class="year-section year-2023" id="stats2023"></div>
-                <div class="year-section year-2024" id="stats2024"></div>
-                <div class="year-section year-2025" id="stats2025"></div>
+            <div class="year-section year-2025" id="stats2025">
+                <!-- 2025-26 stats will be inserted here -->
             </div>
         </div>
     </div>
 
     <script>
-        const NAVY = '#07385E', GOLD = '#D5C393', NAVY_MED = '#4A7BA7', NAVY_LIGHT = '#9BB8CA';
-        
+        // 2023-24 Season Data
         const matchData2023 = [
             { match: 1, date: '12 Aug 2023', day: 'Saturday', opponent: 'St Albans City', attendance: 3412, result: '2-1', opponentPos: 3 },
             { match: 2, date: '15 Aug 2023', day: 'Tuesday', opponent: 'Truro City FC', attendance: 3315, result: '2-1', opponentPos: 9 },
@@ -103,6 +214,7 @@
             { match: 23, date: '13 Apr 2024', day: 'Saturday', opponent: 'Dartford', attendance: 5701, result: '3-1', opponentPos: 21 }
         ];
 
+        // 2024-25 Season Data
         const matchData2024 = [
             { match: 1, date: '10 Aug 2024', day: 'Saturday', opponent: 'Hartlepool', attendance: 3646, result: '0-1', opponentPos: 11 },
             { match: 2, date: '20 Aug 2024', day: 'Tuesday', opponent: 'Ebbsfleet', attendance: 3295, result: '3-2', opponentPos: 23 },
@@ -129,6 +241,7 @@
             { match: 23, date: '26 Apr 2025', day: 'Saturday', opponent: 'Sutton Utd', attendance: 3566, result: '1-2', opponentPos: 14 }
         ];
 
+        // 2025-26 Season Data
         const matchData2025 = [
             { match: 1, date: '09 Aug 2025', day: 'Saturday', opponent: 'Hartlepool', attendance: 3239, result: '0-0', opponentPos: 9 },
             { match: 2, date: '20 Aug 2025', day: 'Wednesday', opponent: 'Brackley', attendance: 2716, result: '2-1', opponentPos: 11 },
@@ -147,91 +260,148 @@
         function calculateTrendline(data) {
             const validData = data.filter(d => d !== null);
             if (validData.length < 2) return data.map(() => null);
+            
             const n = validData.length;
             const indices = validData.map((_, i) => i);
             const sumX = indices.reduce((a, b) => a + b, 0);
             const sumY = validData.reduce((a, b) => a + b, 0);
             const sumXY = indices.reduce((sum, x, i) => sum + x * validData[i], 0);
             const sumX2 = indices.reduce((sum, x) => sum + x * x, 0);
+            
             const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
             const intercept = (sumY - slope * sumX) / n;
+            
             return data.map((d, i) => d !== null ? slope * i + intercept : null);
         }
 
         function updateStats(capacity) {
             function createStatsHTML(seasonData, year, elementId) {
                 if (seasonData.length === 0) {
-                    document.getElementById(elementId).innerHTML = '<h3>' + year + ' Season</h3><p style="text-align: center; color: #999;">Data to be added</p>';
+                    document.getElementById(elementId).innerHTML = `
+                        <h3>${year} Season</h3>
+                        <p style="text-align: center; color: #999;">Data to be added</p>
+                    `;
                     return;
                 }
+
                 const attendances = seasonData.map(m => m.attendance);
                 const total = attendances.reduce((a, b) => a + b, 0);
                 const average = Math.round(total / attendances.length);
                 const highest = Math.max(...attendances);
                 const lowest = Math.min(...attendances);
                 const avgCapacity = ((average / capacity) * 100).toFixed(1);
+
                 const highestMatch = seasonData.find(m => m.attendance === highest);
                 const lowestMatch = seasonData.find(m => m.attendance === lowest);
-                document.getElementById(elementId).innerHTML = 
-                    '<h3>' + year + ' Season</h3>' +
-                    '<div class="stat-row"><span>Matches:</span><strong>' + seasonData.length + '</strong></div>' +
-                    '<div class="stat-row"><span>Average:</span><strong>' + average.toLocaleString() + ' (' + avgCapacity + '%)</strong></div>' +
-                    '<div class="stat-row"><span>Total:</span><strong>' + total.toLocaleString() + '</strong></div>' +
-                    '<div class="stat-row"><span>Highest:</span><strong>' + highest.toLocaleString() + '</strong></div>' +
-                    '<div class="stat-row"><span style="font-size: 11px; color: rgba(26,26,26,0.5);">vs ' + highestMatch.opponent + '</span></div>' +
-                    '<div class="stat-row"><span>Lowest:</span><strong>' + lowest.toLocaleString() + '</strong></div>' +
-                    '<div class="stat-row"><span style="font-size: 11px; color: rgba(26,26,26,0.5);">vs ' + lowestMatch.opponent + '</span></div>';
+
+                document.getElementById(elementId).innerHTML = `
+                    <h3>${year} Season</h3>
+                    <div class="stat-row">
+                        <span>Matches:</span>
+                        <strong>${seasonData.length}</strong>
+                    </div>
+                    <div class="stat-row">
+                        <span>Average:</span>
+                        <strong>${average.toLocaleString()} (${avgCapacity}%)</strong>
+                    </div>
+                    <div class="stat-row">
+                        <span>Total:</span>
+                        <strong>${total.toLocaleString()}</strong>
+                    </div>
+                    <div class="stat-row">
+                        <span>Highest:</span>
+                        <strong>${highest.toLocaleString()}</strong>
+                    </div>
+                    <div class="stat-row">
+                        <span style="font-size: 12px; color: #666;">vs ${highestMatch.opponent}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Lowest:</span>
+                        <strong>${lowest.toLocaleString()}</strong>
+                    </div>
+                    <div class="stat-row">
+                        <span style="font-size: 12px; color: #666;">vs ${lowestMatch.opponent}</span>
+                    </div>
+                `;
             }
+
             createStatsHTML(matchData2023, '2023-24', 'stats2023');
             createStatsHTML(matchData2024, '2024-25', 'stats2024');
             createStatsHTML(matchData2025, '2025-26', 'stats2025');
         }
 
         function updateSummary(capacity) {
-            var summaryHTML = '<h4>Season Summary</h4>';
+            let summaryHTML = '<h4>Season Summary</h4>';
+            
             const seasons = [
                 { data: matchData2023, name: '2023-24' },
                 { data: matchData2024, name: '2024-25' },
                 { data: matchData2025, name: '2025-26' }
             ];
+
             const availableSeasons = seasons.filter(s => s.data.length > 0);
+            
             if (availableSeasons.length === 0) {
                 summaryHTML += '<p>No data available yet.</p>';
+            } else if (availableSeasons.length === 1) {
+                const season = availableSeasons[0];
+                const avg = Math.round(season.data.reduce((sum, m) => sum + m.attendance, 0) / season.data.length);
+                const pct = ((avg / capacity) * 100).toFixed(1);
+                summaryHTML += `<p><strong>${season.name}:</strong> Average attendance of ${avg.toLocaleString()} (${pct}% capacity) across ${season.data.length} matches.</p>`;
             } else {
                 const averages = availableSeasons.map(s => ({
                     name: s.name,
                     avg: Math.round(s.data.reduce((sum, m) => sum + m.attendance, 0) / s.data.length),
                     matches: s.data.length
                 }));
+
                 averages.forEach((season, i) => {
                     const pct = ((season.avg / capacity) * 100).toFixed(1);
-                    summaryHTML += '<p><strong>' + season.name + ':</strong> ' + season.avg.toLocaleString() + ' average (' + pct + '%) over ' + season.matches + ' matches';
+                    summaryHTML += `<p><strong>${season.name}:</strong> ${season.avg.toLocaleString()} average (${pct}%) over ${season.matches} matches`;
+                    
                     if (i > 0) {
                         const diff = season.avg - averages[i-1].avg;
                         const diffPct = ((diff / averages[i-1].avg) * 100).toFixed(1);
-                        const direction = diff > 0 ? '↑' : '↓';
+                        const direction = diff > 0 ? 'up' : 'down';
                         const color = diff > 0 ? '#28a745' : '#dc3545';
-                        summaryHTML += ' <span style="color: ' + color + ';">(' + direction + ' ' + Math.abs(diffPct) + '%)</span>';
+                        summaryHTML += ` (<span style="color: ${color};">${direction} ${Math.abs(diffPct)}%</span>)`;
                     }
-                    summaryHTML += '</p>';
+                    summaryHTML += '.</p>';
                 });
             }
+
             document.getElementById('summaryBox').innerHTML = summaryHTML;
         }
 
         function createChart(capacity) {
             const ctx = document.getElementById('comparisonChart').getContext('2d');
-            if (chart) chart.destroy();
+            
+            if (chart) {
+                chart.destroy();
+            }
 
-            const maxMatches = Math.max(matchData2023.length, matchData2024.length, matchData2025.length);
-            const labels = Array.from({length: maxMatches}, (_, i) => 'Match ' + (i + 1));
+            const maxMatches = Math.max(
+                matchData2023.length,
+                matchData2024.length,
+                matchData2025.length
+            );
+
+            const labels = Array.from({length: maxMatches}, (_, i) => `Match ${i + 1}`);
 
             const attendances2023 = Array(maxMatches).fill(null);
-            matchData2023.forEach((match, i) => { attendances2023[i] = match.attendance; });
+            matchData2023.forEach((match, i) => {
+                attendances2023[i] = match.attendance;
+            });
+
             const attendances2024 = Array(maxMatches).fill(null);
-            matchData2024.forEach((match, i) => { attendances2024[i] = match.attendance; });
+            matchData2024.forEach((match, i) => {
+                attendances2024[i] = match.attendance;
+            });
+
             const attendances2025 = Array(maxMatches).fill(null);
-            matchData2025.forEach((match, i) => { attendances2025[i] = match.attendance; });
+            matchData2025.forEach((match, i) => {
+                attendances2025[i] = match.attendance;
+            });
 
             const trendline2023 = calculateTrendline(attendances2023);
             const trendline2024 = calculateTrendline(attendances2024);
@@ -244,12 +414,12 @@
                     datasets: [{
                         label: '2023-24 Attendance',
                         data: attendances2023,
-                        borderColor: NAVY_LIGHT,
-                        backgroundColor: 'rgba(155, 184, 202, 0.1)',
-                        borderWidth: 2,
-                        pointRadius: 4,
-                        pointHoverRadius: 6,
-                        pointBackgroundColor: NAVY_LIGHT,
+                        borderColor: '#9b59b6',
+                        backgroundColor: 'rgba(155, 89, 182, 0.1)',
+                        borderWidth: 3,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: '#9b59b6',
                         pointBorderColor: '#fff',
                         pointBorderWidth: 2,
                         tension: 0.3,
@@ -257,7 +427,7 @@
                     }, {
                         label: '2023-24 Trendline',
                         data: trendline2023,
-                        borderColor: '#7A9DB5',
+                        borderColor: '#9b59b6',
                         borderWidth: 2,
                         borderDash: [10, 5],
                         pointRadius: 0,
@@ -267,12 +437,12 @@
                     }, {
                         label: '2024-25 Attendance',
                         data: attendances2024,
-                        borderColor: NAVY_MED,
-                        backgroundColor: 'rgba(74, 123, 167, 0.1)',
-                        borderWidth: 2.5,
-                        pointRadius: 5,
-                        pointHoverRadius: 7,
-                        pointBackgroundColor: NAVY_MED,
+                        borderColor: '#ff6b6b',
+                        backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                        borderWidth: 3,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: '#ff6b6b',
                         pointBorderColor: '#fff',
                         pointBorderWidth: 2,
                         tension: 0.3,
@@ -280,7 +450,7 @@
                     }, {
                         label: '2024-25 Trendline',
                         data: trendline2024,
-                        borderColor: '#3A6B97',
+                        borderColor: '#ff6b6b',
                         borderWidth: 2,
                         borderDash: [10, 5],
                         pointRadius: 0,
@@ -290,12 +460,12 @@
                     }, {
                         label: '2025-26 Attendance',
                         data: attendances2025,
-                        borderColor: NAVY,
-                        backgroundColor: 'rgba(7, 56, 94, 0.1)',
+                        borderColor: '#00703c',
+                        backgroundColor: 'rgba(0, 112, 60, 0.1)',
                         borderWidth: 3,
                         pointRadius: 6,
                         pointHoverRadius: 8,
-                        pointBackgroundColor: NAVY,
+                        pointBackgroundColor: '#00703c',
                         pointBorderColor: '#fff',
                         pointBorderWidth: 2,
                         tension: 0.3,
@@ -303,8 +473,8 @@
                     }, {
                         label: '2025-26 Trendline',
                         data: trendline2025,
-                        borderColor: '#05283E',
-                        borderWidth: 2.5,
+                        borderColor: '#00703c',
+                        borderWidth: 2,
                         borderDash: [10, 5],
                         pointRadius: 0,
                         pointHoverRadius: 0,
@@ -322,86 +492,63 @@
                             labels: {
                                 usePointStyle: true,
                                 padding: 20,
-                                font: { family: 'Montserrat', size: 12 },
-                                generateLabels: function(chart) {
-                                    const datasets = chart.data.datasets;
-                                    const labels = [];
-                                    // Add only attendance datasets (indices 0, 2, 4)
-                                    [0, 2, 4].forEach(function(i) {
-                                        const meta = chart.getDatasetMeta(i);
-                                        labels.push({
-                                            text: datasets[i].label,
-                                            fillStyle: datasets[i].borderColor,
-                                            strokeStyle: datasets[i].borderColor,
-                                            lineWidth: 2,
-                                            hidden: meta.hidden,
-                                            datasetIndex: i,
-                                            pointStyle: 'circle'
-                                        });
-                                    });
-                                    // Add trendline toggle
-                                    labels.push({
-                                        text: chart.trendlinesVisible !== false ? 'Hide Trendlines' : 'Show Trendlines',
-                                        fillStyle: 'transparent',
-                                        strokeStyle: NAVY,
-                                        lineWidth: 1,
-                                        hidden: false,
-                                        datasetIndex: -1,
-                                        pointStyle: 'line'
-                                    });
-                                    return labels;
+                                font: {
+                                    size: 13
                                 }
-                            },
-                            onClick: function(e, legendItem, legend) {
-                                const ci = legend.chart;
-                                if (legendItem.datasetIndex === -1) {
-                                    // Toggle trendlines
-                                    ci.trendlinesVisible = ci.trendlinesVisible === false ? true : false;
-                                    [1, 3, 5].forEach(function(i) {
-                                        ci.getDatasetMeta(i).hidden = !ci.trendlinesVisible;
-                                    });
-                                } else {
-                                    // Default behavior for attendance lines
-                                    const index = legendItem.datasetIndex;
-                                    const meta = ci.getDatasetMeta(index);
-                                    meta.hidden = meta.hidden === null ? !ci.data.datasets[index].hidden : null;
-                                }
-                                ci.update();
                             }
                         },
                         tooltip: {
-                            backgroundColor: NAVY,
-                            titleFont: { family: 'Montserrat', size: 13, weight: '600' },
-                            bodyFont: { family: 'Montserrat', size: 12 },
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
                             padding: 12,
-                            cornerRadius: 4,
-                            filter: function(tooltipItem) { return tooltipItem.datasetIndex === 0 || tooltipItem.datasetIndex === 2 || tooltipItem.datasetIndex === 4; },
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 13
+                            },
+                            filter: function(tooltipItem) {
+                                // Only show tooltip for actual data, not trendlines
+                                return tooltipItem.datasetIndex === 0 || tooltipItem.datasetIndex === 2 || tooltipItem.datasetIndex === 4;
+                            },
                             callbacks: {
                                 title: function(context) {
                                     const datasetIndex = context[0].datasetIndex;
                                     const matchIndex = context[0].dataIndex;
-                                    var matchData;
+                                    let matchData;
                                     if (datasetIndex === 0) matchData = matchData2023[matchIndex];
                                     else if (datasetIndex === 2) matchData = matchData2024[matchIndex];
                                     else if (datasetIndex === 4) matchData = matchData2025[matchIndex];
-                                    if (matchData) return 'Match ' + matchData.match + ': vs ' + matchData.opponent;
+                                    
+                                    if (matchData) {
+                                        return `Match ${matchData.match}: vs ${matchData.opponent}`;
+                                    }
                                     return '';
                                 },
                                 label: function(context) {
                                     const datasetIndex = context.datasetIndex;
                                     const matchIndex = context.dataIndex;
-                                    var matchData, year;
-                                    if (datasetIndex === 0) { matchData = matchData2023[matchIndex]; year = '2023-24'; }
-                                    else if (datasetIndex === 2) { matchData = matchData2024[matchIndex]; year = '2024-25'; }
-                                    else if (datasetIndex === 4) { matchData = matchData2025[matchIndex]; year = '2025-26'; }
+                                    let matchData, year;
+                                    if (datasetIndex === 0) {
+                                        matchData = matchData2023[matchIndex];
+                                        year = '2023-24';
+                                    } else if (datasetIndex === 2) {
+                                        matchData = matchData2024[matchIndex];
+                                        year = '2024-25';
+                                    } else if (datasetIndex === 4) {
+                                        matchData = matchData2025[matchIndex];
+                                        year = '2025-26';
+                                    }
+                                    
                                     if (matchData) {
                                         const pct = ((matchData.attendance / capacity) * 100).toFixed(1);
                                         return [
-                                            'Season: ' + year,
-                                            'Date: ' + matchData.date + ' (' + matchData.day + ')',
-                                            'Attendance: ' + matchData.attendance.toLocaleString(),
-                                            'Capacity: ' + pct + '%',
-                                            'Result: ' + matchData.result
+                                            `Season: ${year}`,
+                                            `Date: ${matchData.date} (${matchData.day})`,
+                                            `Attendance: ${matchData.attendance.toLocaleString()}`,
+                                            `Capacity: ${pct}%`,
+                                            `Result: ${matchData.result}`,
+                                            `Opponent Position: ${matchData.opponentPos}`
                                         ];
                                     }
                                     return '';
@@ -413,12 +560,19 @@
                         y: {
                             beginAtZero: true,
                             max: Math.max(capacity, Math.max(...attendances2023.filter(a => a !== null), ...attendances2024.filter(a => a !== null), ...attendances2025.filter(a => a !== null)) * 1.1),
-                            ticks: { font: { family: 'Montserrat', size: 11 }, color: 'rgba(26, 26, 26, 0.6)', callback: function(value) { return value.toLocaleString(); } },
-                            grid: { color: 'rgba(7, 56, 94, 0.08)' }
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
                         },
                         x: {
-                            ticks: { font: { family: 'Montserrat', size: 11 }, color: 'rgba(26, 26, 26, 0.6)' },
-                            grid: { display: false }
+                            grid: {
+                                display: false
+                            }
                         }
                     }
                 },
@@ -429,17 +583,22 @@
                         const yAxis = chart.scales.y;
                         const xAxis = chart.scales.x;
                         const yCapacity = yAxis.getPixelForValue(capacity);
+
                         ctx.save();
-                        ctx.strokeStyle = GOLD;
+                        
+                        // Draw capacity line
+                        ctx.strokeStyle = '#dc3545';
                         ctx.lineWidth = 2;
-                        ctx.setLineDash([5, 5]);
+                        ctx.setLineDash([]);
                         ctx.beginPath();
                         ctx.moveTo(xAxis.left, yCapacity);
                         ctx.lineTo(xAxis.right, yCapacity);
                         ctx.stroke();
-                        ctx.fillStyle = NAVY;
-                        ctx.font = '500 12px Montserrat';
-                        ctx.fillText('Capacity: ' + capacity.toLocaleString(), xAxis.right - 130, yCapacity - 8);
+
+                        ctx.fillStyle = '#dc3545';
+                        ctx.font = 'bold 12px Arial';
+                        ctx.fillText(`Capacity: ${capacity.toLocaleString()}`, xAxis.right - 150, yCapacity - 8);
+
                         ctx.restore();
                     }
                 }]
@@ -455,7 +614,9 @@
             }
         }
 
-        window.onload = function() { updateChart(); };
+        window.onload = function() {
+            updateChart();
+        };
     </script>
 </body>
 </html>
