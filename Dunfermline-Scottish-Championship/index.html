@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dunfermline FC: Season Attendance Comparison | Impresario Strategic</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <style>
+        * { font-family: 'Montserrat', sans-serif; }
+        body { margin: 0; padding: 20px; background-color: #f8f8f8; min-height: 100vh; box-sizing: border-box; }
+        .container { max-width: 1300px; margin: 0 auto; }
+        .chart-wrapper { background-color: #ffffff; border-radius: 8px; padding: 24px; position: relative; box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        h1 { color: #07385E; text-align: center; margin-bottom: 8px; font-size: 22px; font-weight: 600; }
+        .subtitle { text-align: center; color: rgba(26, 26, 26, 0.6); margin-bottom: 24px; font-size: 14px; }
+        #chartContainer { position: relative; height: 550px; margin-bottom: 20px; }
+        .branding { position: absolute; bottom: 24px; right: 24px; display: flex; align-items: center; gap: 8px; opacity: 0.5; }
+        .branding-text { color: #07385E; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; }
+        .branding-icon { width: 24px; height: 24px; }
+        .comparison-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 20px; }
+        .year-section { background-color: #f8f8f8; padding: 20px; border-radius: 8px; border-left: 4px solid #07385E; }
+        .year-section.year-2023 { border-left-color: #9BB8CA; }
+        .year-section.year-2024 { border-left-color: #4A7BA7; }
+        .year-section.year-2025 { border-left-color: #07385E; }
+        .year-section h3 { margin: 0 0 16px 0; font-size: 14px; font-weight: 600; }
+        .year-section.year-2023 h3 { color: #9BB8CA; }
+        .year-section.year-2024 h3 { color: #4A7BA7; }
+        .year-section.year-2025 h3 { color: #07385E; }
+        .stat-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(7, 56, 94, 0.1); font-size: 13px; color: rgba(26, 26, 26, 0.7); }
+        .stat-row:last-child { border-bottom: none; }
+        .stat-row strong { color: #1A1A1A; }
+        .input-section { background-color: #f8f8f8; padding: 16px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; }
+        .input-section label { font-weight: 500; color: #07385E; font-size: 13px; }
+        .input-section input[type="number"] { padding: 8px 12px; border: 1px solid rgba(7, 56, 94, 0.2); border-radius: 4px; font-size: 14px; width: 100px; font-family: 'Montserrat', sans-serif; }
+        .input-section button { background-color: #07385E; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 500; font-family: 'Montserrat', sans-serif; }
+        .input-section button:hover { background-color: #0a4a7a; }
+
+        @media (max-width: 1024px) { .comparison-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="chart-wrapper">
+            <h1>Dunfermline FC: Season Attendance Comparison</h1>
+            <p class="subtitle">Three-season attendance analysis at KDM East End Park (2023-24, 2024-25 & 2025-26)</p>
+            
+            <div class="input-section">
+                <label for="capacityInput">Stadium Capacity:</label>
+                <input type="number" id="capacityInput" value="11480" min="8000" max="15000">
+                <button onclick="updateChart()">Update</button>
+            </div>
+
+            <div id="chartContainer">
+                <canvas id="comparisonChart"></canvas>
+            </div>
+
+            <div class="branding">
+                <svg class="branding-icon" viewBox="0 0 25400 25400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="#07385E" fill-rule="nonzero" d="M14589.56 9160.1c967.54,373.75 1796.66,1026.13 2388.22,1858.26 609.4,857.37 968.01,1904.97 968.01,3035.47 0,1130.38 -358.61,2178.21 -968.13,3035.57 -625.38,879.72 -1516.27,1558.47 -2555.39,1919.56l-330.52 114.87 0 -9611.37c-194.16,-59.39 -394.28,-106.77 -599.29,-141.23 -255.14,-42.92 -520.04,-65.37 -792.46,-65.37 -272.42,0 -537.32,22.45 -792.46,65.37 -205.01,34.46 -405.13,81.84 -599.29,141.23l0 9611.37 -330.5 -114.87c-1039.14,-361.09 -1930.01,-1039.84 -2555.41,-1919.56 -609.52,-857.36 -968.13,-1905.19 -968.13,-3035.57 0,-1130.5 358.61,-2178.1 968.01,-3035.47 591.69,-832.24 1420.7,-1484.49 2388.22,-1858.24l0 -2883.97 3779.12 0 0 248.91 0 2635.04zm-497.81 -164.17l0 -11.99 0 -2209.98 -2783.5 0 0 2209.98 0 11.99c169.66,-46.8 342.39,-85.13 517.69,-114.53 286.42,-48.19 578.82,-73.36 874.06,-73.36 295.24,0 587.64,25.17 874.06,73.36 175.32,29.4 348.03,67.73 517.69,114.53zm2481.58 2310.26c-499.13,-702.29 -1184.58,-1263.01 -1983.77,-1610.1l0 8715.46c799.07,-346.97 1484.52,-907.68 1983.64,-1609.97 550.73,-774.71 874.78-1723.07 874.78-2747.75 0-1024.8 -324.05,-1973.05 -874.65-2747.64zm-7746.53 5495.39c499.12,702.29 1184.59,1263 1983.64,1609.97l0 -8715.46c-799.17,347.09 -1484.64,907.81 -1983.75,1610.1 -550.62,774.59 -874.64,1722.84 -874.64,2747.64 0,1024.68 324.02,1973.04 874.75,2747.75z"/>
+                </svg>
+                <span class="branding-text">Impresario Strategic</span>
+            </div>
+
+            <div class="comparison-grid">
+                <div class="year-section year-2023" id="stats2023"></div>
+                <div class="year-section year-2024" id="stats2024"></div>
+                <div class="year-section year-2025" id="stats2025"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const NAVY = '#07385E', GOLD = '#D5C393', NAVY_MED = '#4A7BA7', NAVY_LIGHT = '#9BB8CA';
+        
+        const matchData2023 = [
+            { match: 1, date: '05 Aug 2023', day: 'Saturday', opponent: 'Airdrieonians', attendance: 4977, result: '2-1', opponentPos: 4 },
+            { match: 3, date: '26 Aug 2023', day: 'Saturday', opponent: 'Raith Rovers', attendance: 7583, result: '0-1', opponentPos: 3 },
+            { match: 6, date: '23 Sep 2023', day: 'Saturday', opponent: 'Morton', attendance: 5344, result: '3-1', opponentPos: 8 },
+            { match: 8, date: '28 Nov 2023', day: 'Tuesday', opponent: 'Arbroath', attendance: 3226, result: '3-0', opponentPos: 4 },
+            { match: 9, date: '21 Oct 2023', day: 'Saturday', opponent: 'Ayr United', attendance: 5073, result: '0-1', opponentPos: 7 },
+            { match: 11, date: '18 Nov 2023', day: 'Saturday', opponent: 'Inverness CT', attendance: 5034, result: '1-1', opponentPos: 10 },
+            { match: 13, date: '10 Nov 2023', day: 'Friday', opponent: 'Dundee United', attendance: 7237, result: '1-2', opponentPos: 1 },
+            { match: 14, date: '10 Feb 2024', day: 'Saturday', opponent: 'Queen\'s Park', attendance: 4433, result: '0-3', opponentPos: 8 },
+            { match: 16, date: '16 Dec 2023', day: 'Saturday', opponent: 'Partick Thistle', attendance: 4777, result: '1-2', opponentPos: 3 },
+            { match: 19, date: '02 Jan 2024', day: 'Tuesday', opponent: 'Raith Rovers', attendance: 8447, result: '1-2', opponentPos: 2 },
+            { match: 21, date: '05 Mar 2024', day: 'Tuesday', opponent: 'Airdrieonians', attendance: 4988, result: '0-2', opponentPos: 4 },
+            { match: 23, date: '03 Feb 2024', day: 'Saturday', opponent: 'Morton', attendance: 4701, result: '0-5', opponentPos: 5 },
+            { match: 24, date: '17 Feb 2024', day: 'Saturday', opponent: 'Arbroath', attendance: 4743, result: '1-1', opponentPos: 10 },
+            { match: 27, date: '02 Mar 2024', day: 'Saturday', opponent: 'Ayr United', attendance: 5050, result: '2-0', opponentPos: 6 },
+            { match: 29, date: '15 Mar 2024', day: 'Friday', opponent: 'Dundee United', attendance: 6368, result: '3-1', opponentPos: 1 },
+            { match: 32, date: '06 Apr 2024', day: 'Saturday', opponent: 'Partick Thistle', attendance: 5572, result: '1-1', opponentPos: 3 },
+            { match: 34, date: '20 Apr 2024', day: 'Saturday', opponent: 'Queen\'s Park', attendance: 5123, result: '0-0', opponentPos: 9 },
+            { match: 35, date: '27 Apr 2024', day: 'Saturday', opponent: 'Inverness CT', attendance: 5317, result: '1-1', opponentPos: 8 }
+        ];
+
+        const matchData2024 = [
+            { match: 2, date: '10 Aug 2024', day: 'Saturday', opponent: 'Falkirk', attendance: 7595, result: '0-2', opponentPos: 3 },
+            { match: 4, date: '31 Aug 2024', day: 'Saturday', opponent: 'Ayr United', attendance: 4921, result: '1-1', opponentPos: 1 },
+            { match: 5, date: '13 Sep 2024', day: 'Friday', opponent: 'Raith Rovers', attendance: 6993, result: '2-0', opponentPos: 8 },
+            { match: 7, date: '28 Sep 2024', day: 'Saturday', opponent: 'Queen\'s Park', attendance: 4494, result: '1-2', opponentPos: 5 },
+            { match: 9, date: '19 Oct 2024', day: 'Saturday', opponent: 'Morton', attendance: 4645, result: '0-0', opponentPos: 5 },
+            { match: 11, date: '29 Oct 2024', day: 'Tuesday', opponent: 'Livingston FC', attendance: 4810, result: '3-0', opponentPos: 2 },
+            { match: 12, date: '02 Nov 2024', day: 'Saturday', opponent: 'Partick Thistle', attendance: 5162, result: '0-1', opponentPos: 5 },
+            { match: 14, date: '16 Nov 2024', day: 'Saturday', opponent: 'Airdrieonians', attendance: 4583, result: '1-0', opponentPos: 9 },
+            { match: 16, date: '07 Dec 2024', day: 'Saturday', opponent: 'Hamilton Acad.', attendance: 4286, result: '3-2', opponentPos: 10 },
+            { match: 19, date: '27 Dec 2024', day: 'Friday', opponent: 'Falkirk', attendance: 8558, result: '3-3', opponentPos: 1 },
+            { match: 21, date: '14 Jan 2025', day: 'Tuesday', opponent: 'Ayr United', attendance: 4634, result: '0-2', opponentPos: 2 },
+            { match: 23, date: '01 Feb 2025', day: 'Saturday', opponent: 'Raith Rovers', attendance: 6812, result: '3-1', opponentPos: 7 },
+            { match: 25, date: '22 Feb 2025', day: 'Saturday', opponent: 'Queen\'s Park', attendance: 4527, result: '0-0', opponentPos: 7 },
+            { match: 27, date: '01 Mar 2025', day: 'Saturday', opponent: 'Morton', attendance: 4620, result: '2-1', opponentPos: 6 },
+            { match: 30, date: '22 Mar 2025', day: 'Saturday', opponent: 'Livingston FC', attendance: 4890, result: '1-0', opponentPos: 2 },
+            { match: 32, date: '05 Apr 2025', day: 'Saturday', opponent: 'Hamilton Acad.', attendance: 7636, result: '0-1', opponentPos: 10 },
+            { match: 34, date: '19 Apr 2025', day: 'Saturday', opponent: 'Partick Thistle', attendance: 5688, result: '0-0', opponentPos: 4 },
+            { match: 35, date: '26 Apr 2025', day: 'Saturday', opponent: 'Airdrieonians', attendance: 5504, result: '0-0', opponentPos: 9 }
+        ];
+
+        const matchData2025 = [
+            { match: 2, date: '09 Aug 2025', day: 'Saturday', opponent: 'Airdrieonians', attendance: 5598, result: '2-0', opponentPos: 2 },
+            { match: 4, date: '30 Aug 2025', day: 'Saturday', opponent: 'Ross County', attendance: 4828, result: '2-2', opponentPos: 10 },
+            { match: 5, date: '23 Sep 2025', day: 'Tuesday', opponent: 'Ayr United', attendance: 4910, result: '0-1', opponentPos: 7 },
+            { match: 8, date: '27 Sep 2025', day: 'Saturday', opponent: 'Partick Thistle', attendance: 5629, result: '0-2', opponentPos: 2 },
+            { match: 9, date: '04 Oct 2025', day: 'Saturday', opponent: 'Queen\'s Park', attendance: 4602, result: '0-0', opponentPos: 8 },
+            { match: 11, date: '17 Oct 2025', day: 'Friday', opponent: 'Raith Rovers', attendance: 6753, result: '2-0', opponentPos: 5 },
+            { match: 14, date: '08 Nov 2025', day: 'Saturday', opponent: 'St. Johnstone', attendance: 6894, result: '2-2', opponentPos: 1 },
+            { match: 16, date: '22 Nov 2025', day: 'Saturday', opponent: 'Morton', attendance: 4989, result: '1-0', opponentPos: 6 },
+            { match: 17, date: '06 Dec 2025', day: 'Saturday', opponent: 'Arbroath', attendance: 4900, result: '1-2', opponentPos: 4 }
+        ];
+
+        let capacity = 11480;
+        let chart;
+
+        function updateStats(capacity) {
+            const seasons = [
+                { year: '2023-24', data: matchData2023, element: 'stats2023' },
+                { year: '2024-25', data: matchData2024, element: 'stats2024' },
+                { year: '2025-26', data: matchData2025, element: 'stats2025' }
+            ];
+
+            seasons.forEach(season => {
+                const attendances = season.data.map(m => m.attendance);
+                const total = attendances.reduce((sum, att) => sum + att, 0);
+                const avg = total / attendances.length;
+                const max = Math.max(...attendances);
+                const min = Math.min(...attendances);
+                const avgPct = (avg / capacity * 100).toFixed(1);
+                const maxPct = (max / capacity * 100).toFixed(1);
+
+                const maxMatch = season.data.find(m => m.attendance === max);
+                const minMatch = season.data.find(m => m.attendance === min);
+
+                document.getElementById(season.element).innerHTML = `
+                    <h3>${season.year} Season</h3>
+                    <div class="stat-row"><span>Matches Played</span><strong>${attendances.length}</strong></div>
+                    <div class="stat-row"><span>Total Attendance</span><strong>${total.toLocaleString()}</strong></div>
+                    <div class="stat-row"><span>Average Attendance</span><strong>${Math.round(avg).toLocaleString()} (${avgPct}%)</strong></div>
+                    <div class="stat-row"><span>Highest</span><strong>${max.toLocaleString()} (${maxPct}%) vs ${maxMatch.opponent}</strong></div>
+                    <div class="stat-row"><span>Lowest</span><strong>${min.toLocaleString()} vs ${minMatch.opponent}</strong></div>
+                `;
+            });
+        }
+
+        function linearRegression(x, y) {
+            const n = x.length;
+            const sumX = x.reduce((a, b) => a + b, 0);
+            const sumY = y.reduce((a, b) => a + b, 0);
+            const sumXY = x.reduce((sum, xi, i) => sum + xi * y[i], 0);
+            const sumXX = x.reduce((sum, xi) => sum + xi * xi, 0);
+            const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+            const intercept = (sumY - slope * sumX) / n;
+            return { slope, intercept };
+        }
+
+        function createChart(capacity) {
+            const maxMatches = Math.max(matchData2023.length, matchData2024.length, matchData2025.length);
+            const labels = Array.from({ length: maxMatches }, (_, i) => i + 1);
+
+            const attendances2023 = labels.map((_, i) => matchData2023[i] ? matchData2023[i].attendance : null);
+            const attendances2024 = labels.map((_, i) => matchData2024[i] ? matchData2024[i].attendance : null);
+            const attendances2025 = labels.map((_, i) => matchData2025[i] ? matchData2025[i].attendance : null);
+
+            const xValues2023 = attendances2023.map((_, i) => i).filter(i => attendances2023[i] !== null);
+            const yValues2023 = attendances2023.filter(v => v !== null);
+            const reg2023 = linearRegression(xValues2023, yValues2023);
+            const trend2023 = labels.map((_, i) => reg2023.slope * i + reg2023.intercept);
+
+            const xValues2024 = attendances2024.map((_, i) => i).filter(i => attendances2024[i] !== null);
+            const yValues2024 = attendances2024.filter(v => v !== null);
+            const reg2024 = linearRegression(xValues2024, yValues2024);
+            const trend2024 = labels.map((_, i) => reg2024.slope * i + reg2024.intercept);
+
+            const xValues2025 = attendances2025.map((_, i) => i).filter(i => attendances2025[i] !== null);
+            const yValues2025 = attendances2025.filter(v => v !== null);
+            const reg2025 = linearRegression(xValues2025, yValues2025);
+            const trend2025 = labels.map((_, i) => reg2025.slope * i + reg2025.intercept);
+
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            if (chart) chart.destroy();
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '2023-24',
+                            data: attendances2023,
+                            borderColor: NAVY_LIGHT,
+                            backgroundColor: NAVY_LIGHT,
+                            borderWidth: 3,
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            tension: 0.1,
+                            spanGaps: false
+                        },
+                        {
+                            label: '2023-24 Trend',
+                            data: trend2023,
+                            borderColor: NAVY_LIGHT,
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            pointRadius: 0,
+                            tension: 0,
+                            hidden: true
+                        },
+                        {
+                            label: '2024-25',
+                            data: attendances2024,
+                            borderColor: NAVY_MED,
+                            backgroundColor: NAVY_MED,
+                            borderWidth: 3,
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            tension: 0.1,
+                            spanGaps: false
+                        },
+                        {
+                            label: '2024-25 Trend',
+                            data: trend2024,
+                            borderColor: NAVY_MED,
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            pointRadius: 0,
+                            tension: 0,
+                            hidden: true
+                        },
+                        {
+                            label: '2025-26',
+                            data: attendances2025,
+                            borderColor: NAVY,
+                            backgroundColor: NAVY,
+                            borderWidth: 3,
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            tension: 0.1,
+                            spanGaps: false
+                        },
+                        {
+                            label: '2025-26 Trend',
+                            data: trend2025,
+                            borderColor: NAVY,
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            pointRadius: 0,
+                            tension: 0,
+                            hidden: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            labels: {
+                                font: { family: 'Montserrat', size: 12, weight: '500' },
+                                color: NAVY,
+                                padding: 15,
+                                usePointStyle: true,
+                                generateLabels: function(chart) {
+                                    const originalLabels = Chart.defaults.plugins.legend.labels.generateLabels(chart);
+                                    const mainLabels = originalLabels.filter((_, i) => i === 0 || i === 2 || i === 4);
+                                    mainLabels.push({
+                                        text: 'Toggle Trendlines',
+                                        fillStyle: 'rgba(0,0,0,0)',
+                                        strokeStyle: NAVY,
+                                        lineWidth: 2,
+                                        lineDash: [5, 5],
+                                        datasetIndex: -1
+                                    });
+                                    return mainLabels;
+                                }
+                            },
+                            onClick: function(e, legendItem, legend) {
+                                const ci = legend.chart;
+                                if (legendItem.datasetIndex === -1) {
+                                    ci.trendlinesVisible = ci.trendlinesVisible === false ? true : false;
+                                    [1, 3, 5].forEach(function(i) {
+                                        ci.getDatasetMeta(i).hidden = !ci.trendlinesVisible;
+                                    });
+                                } else {
+                                    const index = legendItem.datasetIndex;
+                                    const meta = ci.getDatasetMeta(index);
+                                    meta.hidden = meta.hidden === null ? !ci.data.datasets[index].hidden : null;
+                                }
+                                ci.update();
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: NAVY,
+                            titleFont: { family: 'Montserrat', size: 13, weight: '600' },
+                            bodyFont: { family: 'Montserrat', size: 12 },
+                            padding: 12,
+                            cornerRadius: 4,
+                            filter: function(tooltipItem) { return tooltipItem.datasetIndex === 0 || tooltipItem.datasetIndex === 2 || tooltipItem.datasetIndex === 4; },
+                            callbacks: {
+                                title: function(context) {
+                                    const datasetIndex = context[0].datasetIndex;
+                                    const matchIndex = context[0].dataIndex;
+                                    var matchData;
+                                    if (datasetIndex === 0) matchData = matchData2023[matchIndex];
+                                    else if (datasetIndex === 2) matchData = matchData2024[matchIndex];
+                                    else if (datasetIndex === 4) matchData = matchData2025[matchIndex];
+                                    if (matchData) return 'Match ' + matchData.match + ': vs ' + matchData.opponent;
+                                    return '';
+                                },
+                                label: function(context) {
+                                    const datasetIndex = context.datasetIndex;
+                                    const matchIndex = context.dataIndex;
+                                    var matchData, year;
+                                    if (datasetIndex === 0) { matchData = matchData2023[matchIndex]; year = '2023-24'; }
+                                    else if (datasetIndex === 2) { matchData = matchData2024[matchIndex]; year = '2024-25'; }
+                                    else if (datasetIndex === 4) { matchData = matchData2025[matchIndex]; year = '2025-26'; }
+                                    if (matchData) {
+                                        const pct = ((matchData.attendance / capacity) * 100).toFixed(1);
+                                        return [
+                                            'Season: ' + year,
+                                            'Date: ' + matchData.date + ' (' + matchData.day + ')',
+                                            'Attendance: ' + matchData.attendance.toLocaleString(),
+                                            'Capacity: ' + pct + '%',
+                                            'Result: ' + matchData.result
+                                        ];
+                                    }
+                                    return '';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: Math.max(capacity, Math.max(...attendances2023.filter(a => a !== null), ...attendances2024.filter(a => a !== null), ...attendances2025.filter(a => a !== null)) * 1.1),
+                            ticks: { font: { family: 'Montserrat', size: 11 }, color: 'rgba(26, 26, 26, 0.6)', callback: function(value) { return value.toLocaleString(); } },
+                            grid: { color: 'rgba(7, 56, 94, 0.08)' }
+                        },
+                        x: {
+                            ticks: { font: { family: 'Montserrat', size: 11 }, color: 'rgba(26, 26, 26, 0.6)' },
+                            grid: { display: false }
+                        }
+                    }
+                },
+                plugins: [{
+                    id: 'capacityLine',
+                    beforeDraw: function(chart) {
+                        const ctx = chart.ctx;
+                        const yAxis = chart.scales.y;
+                        const xAxis = chart.scales.x;
+                        const yCapacity = yAxis.getPixelForValue(capacity);
+                        ctx.save();
+                        ctx.strokeStyle = GOLD;
+                        ctx.lineWidth = 2;
+                        ctx.setLineDash([5, 5]);
+                        ctx.beginPath();
+                        ctx.moveTo(xAxis.left, yCapacity);
+                        ctx.lineTo(xAxis.right, yCapacity);
+                        ctx.stroke();
+                        ctx.fillStyle = NAVY;
+                        ctx.font = '500 12px Montserrat';
+                        ctx.fillText('Capacity: ' + capacity.toLocaleString(), xAxis.right - 130, yCapacity - 8);
+                        ctx.restore();
+                    }
+                }]
+            });
+        }
+
+        function updateChart() {
+            capacity = parseInt(document.getElementById('capacityInput').value);
+            if (capacity && capacity > 0) {
+                createChart(capacity);
+                updateStats(capacity);
+            }
+        }
+
+        window.onload = function() { updateChart(); };
+    </script>
+</body>
+</html>
