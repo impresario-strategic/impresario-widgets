@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>European Football Capacity Analysis | Impresario Strategic</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <style>
+        * { font-family: 'Montserrat', sans-serif; }
+        body { margin: 0; padding: 20px; background-color: #f8f8f8; min-height: 100vh; box-sizing: border-box; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .chart-wrapper { background-color: #ffffff; border-radius: 8px; padding: 24px; position: relative; box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        h1 { color: #07385E; text-align: center; margin-bottom: 8px; font-size: 24px; font-weight: 600; }
+        .subtitle { text-align: center; color: rgba(26, 26, 26, 0.6); margin-bottom: 24px; font-size: 14px; }
+        #chartContainer { position: relative; height: 700px; }
+        .branding { display: flex; align-items: center; justify-content: center; gap: 8px; opacity: 0.5; padding: 20px 0; }
+        .branding-text { color: #07385E; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; }
+        .branding-icon { width: 24px; height: 24px; }
+        .controls { text-align: center; margin-bottom: 20px; margin-top: 20px; }
+        .controls button { background-color: #07385E; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 500; font-family: 'Montserrat', sans-serif; margin: 0 5px; }
+        .controls button:hover { background-color: #0a4a7a; }
+        .summary-box { background-color: #f8fafc; border: 2px solid #07385E; border-radius: 8px; padding: 24px; margin-top: 24px; }
+        .summary-title { color: #07385E; font-size: 16px; font-weight: 600; margin-bottom: 16px; text-align: center; }
+        .summary-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .stat-item { text-align: center; }
+        .stat-label { color: #07385E; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .stat-value { color: #07385E; font-size: 24px; font-weight: 600; }
+        @media (max-width: 768px) { .summary-stats { grid-template-columns: repeat(2, 1fr); gap: 16px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="chart-wrapper">
+            <h1>European Football: Stadium Capacity vs. Sell-Through</h1>
+            <p class="subtitle">2024-25 Season Analysis - 18 Leagues</p>
+
+            <div id="chartContainer">
+                <canvas id="capacityChart"></canvas>
+            </div>
+
+            <div class="controls">
+                <button onclick="clearAll()">Clear All</button>
+                <button onclick="showAll()">Show All</button>
+            </div>
+
+            <div class="summary-box">
+                <div class="summary-title">Summary Statistics - Selected Leagues</div>
+                <div class="summary-stats">
+                    <div class="stat-item">
+                        <div class="stat-label">Total Capacity</div>
+                        <div class="stat-value" id="totalCapacity">-</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Total Sold</div>
+                        <div class="stat-value" id="totalSold">-</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Average Capacity Sold %</div>
+                        <div class="stat-value" id="avgSellThrough">-</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Unsold Inventory</div>
+                        <div class="stat-value" id="unsoldInventory">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="branding">
+            <svg class="branding-icon" viewBox="0 0 25400 25400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill="#07385E" fill-rule="nonzero" d="M14589.56 9160.1c967.54,373.75 1796.66,1026.13 2388.22,1858.26 609.4,857.37 968.01,1904.97 968.01,3035.47 0,1130.38 -358.61,2178.21 -968.13,3035.57 -625.38,879.72 -1516.27,1558.47 -2555.39,1919.56l-330.52 114.87 0 -9611.37c-194.16,-59.39 -394.28,-106.77 -599.29,-141.23 -255.14,-42.92 -520.04,-65.37 -792.46,-65.37 -272.42,0 -537.32,22.45 -792.46,65.37 -205.01,34.46 -405.13,81.84 -599.29,141.23l0 9611.37 -330.5 -114.87c-1039.14,-361.09 -1930.01,-1039.84 -2555.41,-1919.56 -609.52,-857.36 -968.13,-1905.19 -968.13,-3035.57 0,-1130.5 358.61,-2178.1 968.01,-3035.47 591.69,-832.24 1420.7,-1484.49 2388.22,-1858.24l0 -2883.97 3779.12 0 0 248.91 0 2635.04zm-497.81 -164.17l0 -11.99 0 -2209.98 -2783.5 0 0 2209.98 0 11.99c169.66,-46.8 342.39,-85.13 517.69,-114.53 286.42,-48.19 578.82,-73.36 874.06,-73.36 295.24,0 587.64,25.17 874.06,73.36 175.32,29.4 348.03,67.73 517.69,114.53zm2481.58 2310.26c-499.13,-702.29 -1184.58,-1263.01 -1983.77,-1610.1l0 8715.46c799.07,-346.97 1484.52,-907.68 1983.64,-1609.97 550.73,-774.71 874.78,-1723.07 874.78,-2747.75 0,-1024.8 -324.05,-1973.05 -874.65,-2747.64zm-7746.53 5495.39c499.12,702.29 1184.59,1263 1983.64,1609.97l0 -8715.46c-799.17,347.09 -1484.64,907.81 -1983.75,1610.1 -550.62,774.59 -874.64,1722.84 -874.64,2747.64 0,1024.68 324.02,1973.04 874.75,2747.75z"/>
+            </svg>
+            <span class="branding-text">Impresario Strategic</span>
+        </div>
+    </div>
+
+    <script>
+        const NAVY = '#07385E', GOLD = '#D5C393';
+        
+        // Premier League Data
+        const premierLeague = [
+            { club: 'Manchester United', stadium: 'Old Trafford', capacity: 74879, sellThrough: 98.82 },
+            { club: 'Tottenham Hotspur', stadium: 'Tottenham Hotspur Stadium', capacity: 62850, sellThrough: 97.03 },
+            { club: 'Liverpool FC', stadium: 'Anfield', capacity: 61276, sellThrough: 98.55 },
+            { club: 'Arsenal FC', stadium: 'Emirates Stadium', capacity: 60704, sellThrough: 99.13 },
+            { club: 'West Ham United', stadium: 'London Stadium', capacity: 62500, sellThrough: 99.93 },
+            { club: 'Newcastle United', stadium: 'St James\' Park', capacity: 52258, sellThrough: 99.78 },
+            { club: 'Manchester City', stadium: 'Etihad Stadium', capacity: 55097, sellThrough: 95.04 },
+            { club: 'Everton FC', stadium: 'Hill Dickinson Stadium', capacity: 52769, sellThrough: 98.75 },
+            { club: 'Aston Villa', stadium: 'Villa Park', capacity: 42918, sellThrough: 96.70 },
+            { club: 'Chelsea FC', stadium: 'Stamford Bridge', capacity: 41631, sellThrough: 95.47 },
+            { club: 'Wolverhampton Wanderers', stadium: 'Molineux Stadium', capacity: 31750, sellThrough: 94.40 },
+            { club: 'Brighton & Hove Albion', stadium: 'AMEX Stadium', capacity: 31876, sellThrough: 98.62 },
+            { club: 'Fulham FC', stadium: 'Craven Cottage', capacity: 29589, sellThrough: 91.53 },
+            { club: 'Nottingham Forest', stadium: 'The City Ground', capacity: 30404, sellThrough: 99.99 },
+            { club: 'Burnley FC', stadium: 'Turf Moor', capacity: 21994, sellThrough: 95.61 },
+            { club: 'Crystal Palace', stadium: 'Selhurst Park', capacity: 25486, sellThrough: 98.45 },
+            { club: 'Brentford FC', stadium: 'Gtech Community Stadium', capacity: 17250, sellThrough: 98.96 },
+            { club: 'AFC Bournemouth', stadium: 'Vitality Stadium', capacity: 11307, sellThrough: 98.87 }
+        ];
+
+        // Championship Data
+        const championship = [
+            { club: 'Sunderland AFC', stadium: 'Stadium of Light', capacity: 48707, sellThrough: 81.00 },
+            { club: 'Leeds United', stadium: 'Elland Road', capacity: 37890, sellThrough: 95.37 },
+            { club: 'Derby County', stadium: 'Pride Park Stadium', capacity: 33597, sellThrough: 86.37 },
+            { club: 'Sheffield United', stadium: 'Bramall Lane', capacity: 32702, sellThrough: 85.89 },
+            { club: 'Coventry City', stadium: 'Coventry Building Society Arena', capacity: 32609, sellThrough: 85.29 },
+            { club: 'Sheffield Wednesday', stadium: 'Hillsborough', capacity: 39859, sellThrough: 66.83 },
+            { club: 'Norwich City', stadium: 'Carrow Road', capacity: 27244, sellThrough: 96.59 },
+            { club: 'Middlesbrough FC', stadium: 'Riverside Stadium', capacity: 33746, sellThrough: 75.32 },
+            { club: 'West Bromwich Albion', stadium: 'The Hawthorns', capacity: 26850, sellThrough: 93.31 },
+            { club: 'Stoke City', stadium: 'bet365 Stadium', capacity: 30089, sellThrough: 75.78 },
+            { club: 'Bristol City', stadium: 'Ashton Gate', capacity: 27000, sellThrough: 82.50 },
+            { club: 'Hull City', stadium: 'MKM Stadium', capacity: 25586, sellThrough: 83.33 },
+            { club: 'Portsmouth FC', stadium: 'Fratton Park', capacity: 20688, sellThrough: 97.94 },
+            { club: 'Burnley FC', stadium: 'Turf Moor', capacity: 21994, sellThrough: 90.37 },
+            { club: 'Watford FC', stadium: 'Vicarage Road', capacity: 21577, sellThrough: 89.82 },
+            { club: 'Cardiff City', stadium: 'Cardiff City Stadium', capacity: 33280, sellThrough: 58.13 },
+            { club: 'Plymouth Argyle', stadium: 'Home Park', capacity: 18173, sellThrough: 90.99 },
+            { club: 'Preston North End', stadium: 'Deepdale', capacity: 23408, sellThrough: 70.51 },
+            { club: 'Blackburn Rovers', stadium: 'Ewood Park', capacity: 31367, sellThrough: 51.46 },
+            { club: 'Queens Park Rangers', stadium: 'Loftus Road Stadium', capacity: 18360, sellThrough: 86.20 },
+            { club: 'Swansea City', stadium: 'Swansea.com Stadium', capacity: 21088, sellThrough: 73.50 },
+            { club: 'Millwall FC', stadium: 'The Den', capacity: 20146, sellThrough: 76.92 },
+            { club: 'Luton Town', stadium: 'Kenilworth Road', capacity: 11850, sellThrough: 97.51 },
+            { club: 'Oxford United', stadium: 'Kassam Stadium', capacity: 12500, sellThrough: 90.86 }
+        ];
+
+        // League One Data
+        const leagueOne = [
+            { club: 'Birmingham City', stadium: 'St. Andrew\'s @ Knighthead Park', capacity: 29409, sellThrough: 90.85 },
+            { club: 'Bolton Wanderers', stadium: 'Toughsheet Community Stadium', capacity: 28723, sellThrough: 74.24 },
+            { club: 'Huddersfield Town', stadium: 'Accu Stadium', capacity: 24500, sellThrough: 76.80 },
+            { club: 'Charlton Athletic', stadium: 'The Valley', capacity: 26875, sellThrough: 56.76 },
+            { club: 'Wrexham AFC', stadium: 'STōK Cae Ras', capacity: 13341, sellThrough: 95.80 },
+            { club: 'Reading FC', stadium: 'Select Car Leasing Stadium', capacity: 24161, sellThrough: 51.88 },
+            { club: 'Barnsley FC', stadium: 'Oakwell Stadium', capacity: 24009, sellThrough: 50.86 },
+            { club: 'Wigan Athletic', stadium: 'Brick Community Stadium', capacity: 25133, sellThrough: 39.58 },
+            { club: 'Blackpool FC', stadium: 'Bloomfield Road', capacity: 16220, sellThrough: 59.38 },
+            { club: 'Stockport County', stadium: 'Edgeley Park', capacity: 10832, sellThrough: 88.63 },
+            { club: 'Rotherham United', stadium: 'New York Stadium', capacity: 12000, sellThrough: 78.00 },
+            { club: 'Peterborough United', stadium: 'Weston Homes Stadium', capacity: 15314, sellThrough: 59.76 },
+            { club: 'Lincoln City', stadium: 'LNER Stadium', capacity: 10130, sellThrough: 88.89 },
+            { club: 'Bristol Rovers', stadium: 'Memorial Stadium', capacity: 12000, sellThrough: 65.67 },
+            { club: 'Mansfield Town', stadium: 'One Call Stadium', capacity: 9186, sellThrough: 84.58 },
+            { club: 'Leyton Orient', stadium: 'BetWright Stadium', capacity: 9241, sellThrough: 82.52 },
+            { club: 'Cambridge United', stadium: 'Cledara Abbey Stadium', capacity: 8127, sellThrough: 81.70 },
+            { club: 'Northampton Town', stadium: 'Sixfields Stadium', capacity: 7798, sellThrough: 84.23 },
+            { club: 'Exeter City', stadium: 'St James Park', capacity: 8830, sellThrough: 73.76 },
+            { club: 'Shrewsbury Town', stadium: 'Montgomery Waters Meadow', capacity: 9875, sellThrough: 62.90 },
+            { club: 'Wycombe Wanderers', stadium: 'Adams Park', capacity: 10137, sellThrough: 52.90 },
+            { club: 'Crawley Town', stadium: 'Broadfield Stadium', capacity: 6134, sellThrough: 70.23 },
+            { club: 'Stevenage FC', stadium: 'The Lamex Stadium', capacity: 6722, sellThrough: 59.35 },
+            { club: 'Burton Albion', stadium: 'Pirelli Stadium', capacity: 6912, sellThrough: 47.08 }
+        ];
+
+        // League Two Data
+        const leagueTwo = [
+            { club: 'Bradford City', stadium: 'University of Bradford Stadium', capacity: 25136, sellThrough: 70.67 },
+            { club: 'Notts County', stadium: 'Meadow Lane', capacity: 20229, sellThrough: 48.50 },
+            { club: 'Chesterfield FC', stadium: 'SMH Group Stadium', capacity: 10504, sellThrough: 78.27 },
+            { club: 'Doncaster Rovers', stadium: 'Eco-Power Stadium', capacity: 15231, sellThrough: 52.62 },
+            { club: 'AFC Wimbledon', stadium: 'Cherry Red Records Stadium', capacity: 9215, sellThrough: 86.90 },
+            { club: 'Port Vale FC', stadium: 'Vale Park', capacity: 18947, sellThrough: 40.16 },
+            { club: 'Carlisle United', stadium: 'Brunton Park', capacity: 18202, sellThrough: 40.79 },
+            { club: 'Swindon Town', stadium: 'County Ground', capacity: 15728, sellThrough: 46.25 },
+            { club: 'Milton Keynes Dons', stadium: 'Stadium mk', capacity: 30500, sellThrough: 23.03 },
+            { club: 'Walsall FC', stadium: 'Banks\'s Stadium', capacity: 11300, sellThrough: 56.10 },
+            { club: 'Tranmere Rovers', stadium: 'Prenton Park', capacity: 16789, sellThrough: 37.52 },
+            { club: 'Gillingham FC', stadium: 'Priestfield Stadium', capacity: 11582, sellThrough: 54.12 },
+            { club: 'Grimsby Town', stadium: 'Blundell Park', capacity: 9546, sellThrough: 63.55 },
+            { club: 'Crewe Alexandra', stadium: 'Mornflake Stadium', capacity: 10153, sellThrough: 53.01 },
+            { club: 'Colchester United', stadium: 'JobServe Community Stadium', capacity: 10105, sellThrough: 49.45 },
+            { club: 'Newport County', stadium: 'Rodney Parade', capacity: 7850, sellThrough: 53.89 },
+            { club: 'Cheltenham Town', stadium: 'Completely-Suzuki Stadium', capacity: 7066, sellThrough: 59.41 },
+            { club: 'Morecambe FC', stadium: 'Mazuma Stadium', capacity: 6476, sellThrough: 52.66 },
+            { club: 'Barrow AFC', stadium: 'SO Legal Stadium', capacity: 6500, sellThrough: 52.02 },
+            { club: 'Bromley FC', stadium: 'CopperJax Community Stadium', capacity: 5000, sellThrough: 62.22 },
+            { club: 'Fleetwood Town', stadium: 'Highbury Stadium', capacity: 5327, sellThrough: 56.22 },
+            { club: 'Harrogate Town', stadium: 'The Exercise Stadium', capacity: 5000, sellThrough: 58.96 },
+            { club: 'Salford City', stadium: 'The Peninsula Stadium', capacity: 5108, sellThrough: 55.77 },
+            { club: 'Accrington Stanley', stadium: 'The Wham Stadium', capacity: 5450, sellThrough: 46.59 }
+        ];
+
+        // Scottish Premiership Data
+        const scottishPrem = [
+            { club: 'Celtic FC', stadium: 'Celtic Park', capacity: 60411, sellThrough: 97.62 },
+            { club: 'Rangers FC', stadium: 'Ibrox Stadium', capacity: 50987, sellThrough: 94.05 },
+            { club: 'Aberdeen FC', stadium: 'Pittodrie Stadium', capacity: 20866, sellThrough: 85.27 },
+            { club: 'Hibernian FC', stadium: 'Easter Road Stadium', capacity: 20250, sellThrough: 83.98 },
+            { club: 'Heart of Midlothian FC', stadium: 'Tynecastle Park', capacity: 19852, sellThrough: 89.72 },
+            { club: 'Dundee United FC', stadium: 'Tannadice Park', capacity: 14223, sellThrough: 76.27 },
+            { club: 'St. Mirren FC', stadium: 'The SMISA Stadium', capacity: 7937, sellThrough: 93.76 },
+            { club: 'Dundee FC', stadium: 'Kilmac Stadium at Dens Park', capacity: 11850, sellThrough: 60.52 },
+            { club: 'Kilmarnock FC', stadium: 'BBSP Stadium, Rugby Park', capacity: 18128, sellThrough: 35.55 },
+            { club: 'Motherwell FC', stadium: 'Fir Park', capacity: 13677, sellThrough: 42.55 },
+            { club: 'St. Johnstone FC', stadium: 'McDiarmid Park', capacity: 10696, sellThrough: 52.88 },
+            { club: 'Ross County FC', stadium: 'Global Energy Stadium', capacity: 6541, sellThrough: 67.20 }
+        ];
+
+        // Serie A Data
+        const serieA = [
+            { club: 'AC Milan', stadium: 'Giuseppe Meazza', capacity: 75923, sellThrough: 94.19 },
+            { club: 'Inter Milan', stadium: 'Giuseppe Meazza', capacity: 75923, sellThrough: 92.37 },
+            { club: 'AS Roma', stadium: 'Olimpico di Roma', capacity: 70634, sellThrough: 88.39 },
+            { club: 'SSC Napoli', stadium: 'Diego Armando Maradona', capacity: 54726, sellThrough: 93.26 },
+            { club: 'SS Lazio', stadium: 'Olimpico di Roma', capacity: 70634, sellThrough: 62.40 },
+            { club: 'Juventus FC', stadium: 'Allianz Stadium', capacity: 41507, sellThrough: 96.94 },
+            { club: 'Genoa CFC', stadium: 'Luigi Ferraris', capacity: 34901, sellThrough: 88.83 },
+            { club: 'Bologna FC 1909', stadium: 'Stadio Renato Dall\'Ara', capacity: 36462, sellThrough: 76.72 },
+            { club: 'US Lecce', stadium: 'Ettore Giardiniero', capacity: 31559, sellThrough: 82.41 },
+            { club: 'Hellas Verona', stadium: 'Marcantonio Bentegodi', capacity: 39211, sellThrough: 63.47 },
+            { club: 'Torino FC', stadium: 'Olimpico Grande Torino', capacity: 28177, sellThrough: 82.78 },
+            { club: 'Atalanta BC', stadium: 'New Balance Arena - Bergamo', capacity: 24950, sellThrough: 90.88 },
+            { club: 'Udinese Calcio', stadium: 'Bluenergy Stadium', capacity: 25144, sellThrough: 86.79 },
+            { club: 'ACF Fiorentina', stadium: 'Artemio Franchi', capacity: 43147, sellThrough: 47.19 },
+            { club: 'Parma Calcio 1913', stadium: 'Ennio Tardini', capacity: 22352, sellThrough: 85.56 },
+            { club: 'Cagliari Calcio', stadium: 'Unipol Domus', capacity: 16365, sellThrough: 98.29 },
+            { club: 'AC Monza', stadium: 'Brianteo', capacity: 17102, sellThrough: 64.93 },
+            { club: 'FC Empoli', stadium: 'Carlo Castellani', capacity: 19847, sellThrough: 54.33 },
+            { club: 'Como 1907', stadium: 'Giuseppe Sinigaglia', capacity: 12039, sellThrough: 87.42 },
+            { club: 'Venezia FC', stadium: 'Pier Luigi Penzo', capacity: 12048, sellThrough: 86.15 }
+        ];
+
+        // La Liga Data
+        const laLiga = [
+            { club: 'Real Madrid', stadium: 'Santiago Bernabéu', capacity: 83186, sellThrough: 87.38 },
+            { club: 'Atlético de Madrid', stadium: 'Riyadh Air Metropolitano', capacity: 70460, sellThrough: 86.41 },
+            { club: 'Real Betis Balompié', stadium: 'La Cartuja', capacity: 70000, sellThrough: 73.63 },
+            { club: 'Athletic Bilbao', stadium: 'San Mamés', capacity: 53289, sellThrough: 90.86 },
+            { club: 'FC Barcelona', stadium: 'Spotify Camp Nou', capacity: 45401, sellThrough: 101.22 },
+            { club: 'Valencia CF', stadium: 'Mestalla', capacity: 49430, sellThrough: 87.07 },
+            { club: 'Sevilla FC', stadium: 'Ramón Sánchez-Pizjuán', capacity: 43883, sellThrough: 81.16 },
+            { club: 'Real Sociedad', stadium: 'Reale Arena', capacity: 39313, sellThrough: 77.58 },
+            { club: 'RCD Espanyol Barcelona', stadium: 'RCDE Stadium', capacity: 37776, sellThrough: 67.88 },
+            { club: 'UD Las Palmas', stadium: 'Estadio de Gran Canaria', capacity: 32400, sellThrough: 71.02 },
+            { club: 'Celta de Vigo', stadium: 'Abanca Balaídos', capacity: 24870, sellThrough: 86.47 },
+            { club: 'CA Osasuna', stadium: 'El Sadar', capacity: 23576, sellThrough: 86.85 },
+            { club: 'Real Valladolid CF', stadium: 'José Zorrilla', capacity: 27618, sellThrough: 71.73 },
+            { club: 'RCD Mallorca', stadium: 'Mallorca Son Moix', capacity: 26020, sellThrough: 71.11 },
+            { club: 'Villarreal CF', stadium: 'La Cerámica', capacity: 23500, sellThrough: 77.71 },
+            { club: 'Deportivo Alavés', stadium: 'Mendizorroza', capacity: 19840, sellThrough: 87.28 },
+            { club: 'Rayo Vallecano', stadium: 'Estadio de Vallecas', capacity: 14708, sellThrough: 87.56 },
+            { club: 'Girona FC', stadium: 'Montilivi', capacity: 14624, sellThrough: 79.71 },
+            { club: 'Getafe CF', stadium: 'Coliseum', capacity: 16800, sellThrough: 68.27 },
+            { club: 'CD Leganés', stadium: 'Butarque', capacity: 12454, sellThrough: 89.41 }
+        ];
+
+        // Bundesliga Data
+        const bundesliga = [
+            { club: 'Borussia Dortmund', stadium: 'SIGNAL IDUNA PARK', capacity: 81365, sellThrough: 100.00 },
+            { club: 'Bayern Munich', stadium: 'Allianz Arena', capacity: 75000, sellThrough: 100.00 },
+            { club: 'VfB Stuttgart', stadium: 'MHPArena Stuttgart', capacity: 60449, sellThrough: 98.04 },
+            { club: 'Eintracht Frankfurt', stadium: 'Deutsche Bank Park', capacity: 59500, sellThrough: 96.81 },
+            { club: 'Borussia Mönchengladbach', stadium: 'Stadion im Borussia-Park', capacity: 54042, sellThrough: 98.22 },
+            { club: 'RB Leipzig', stadium: 'Red Bull Arena', capacity: 47069, sellThrough: 95.70 },
+            { club: 'SV Werder Bremen', stadium: 'Weserstadion', capacity: 42100, sellThrough: 98.34 },
+            { club: 'SC Freiburg', stadium: 'Europa-Park Stadion', capacity: 34700, sellThrough: 98.52 },
+            { club: '1.FSV Mainz 05', stadium: 'Mewa Arena', capacity: 33305, sellThrough: 97.25 },
+            { club: 'Bayer 04 Leverkusen', stadium: 'BayArena', capacity: 30210, sellThrough: 99.18 },
+            { club: 'FC Augsburg', stadium: 'WWK ARENA', capacity: 30660, sellThrough: 97.26 },
+            { club: 'FC St. Pauli', stadium: 'Millerntor-Stadion', capacity: 29546, sellThrough: 99.86 },
+            { club: 'VfL Bochum', stadium: 'Vonovia Ruhrstadion', capacity: 26000, sellThrough: 98.25 },
+            { club: 'TSG 1899 Hoffenheim', stadium: 'PreZero Arena', capacity: 30150, sellThrough: 83.94 },
+            { club: 'VfL Wolfsburg', stadium: 'Volkswagen Arena', capacity: 28917, sellThrough: 85.06 },
+            { club: '1.FC Union Berlin', stadium: 'Stadion An der Alten Försterei', capacity: 22012, sellThrough: 99.73 },
+            { club: '1.FC Heidenheim 1846', stadium: 'Voith-Arena', capacity: 15000, sellThrough: 100.00 },
+            { club: 'Holstein Kiel', stadium: 'Holstein-Stadion', capacity: 15034, sellThrough: 99.06 }
+        ];
+
+        // Ligue 1 Data
+        const ligue1 = [
+            { club: 'Olympique Marseille', stadium: 'Orange Vélodrome', capacity: 67394, sellThrough: 94.50 },
+            { club: 'Olympique Lyon', stadium: 'Groupama Stadium', capacity: 59186, sellThrough: 85.53 },
+            { club: 'Paris Saint-Germain', stadium: 'Parc des Princes', capacity: 48583, sellThrough: 98.13 },
+            { club: 'LOSC Lille', stadium: 'Decathlon Arena-Stade Pierre-Mauroy', capacity: 50186, sellThrough: 84.52 },
+            { club: 'RC Lens', stadium: 'Stade Bollaert-Delelis', capacity: 38223, sellThrough: 99.25 },
+            { club: 'FC Nantes', stadium: 'Stade de la Beaujoire', capacity: 35322, sellThrough: 85.69 },
+            { club: 'AS Saint-Étienne', stadium: 'Stade Geoffroy-Guichard', capacity: 41965, sellThrough: 71.88 },
+            { club: 'Stade Rennais FC', stadium: 'Roazhon Park', capacity: 29778, sellThrough: 91.93 },
+            { club: 'FC Toulouse', stadium: 'Stadium Municipal', capacity: 33150, sellThrough: 79.19 },
+            { club: 'OGC Nice', stadium: 'Allianz Riviera', capacity: 36178, sellThrough: 67.15 },
+            { club: 'Le Havre AC', stadium: 'Stade Océane', capacity: 25178, sellThrough: 80.31 },
+            { club: 'RC Strasbourg Alsace', stadium: 'Stade de la Meinau', capacity: 26109, sellThrough: 74.22 },
+            { club: 'AJ Auxerre', stadium: 'Stade de l\'Abbé-Deschamps', capacity: 18541, sellThrough: 89.71 },
+            { club: 'Stade Reims', stadium: 'Stade Auguste-Delaune', capacity: 20519, sellThrough: 76.21 },
+            { club: 'Stade Brestois 29', stadium: 'Stade Francis-Le Blé', capacity: 15220, sellThrough: 95.10 },
+            { club: 'Montpellier HSC', stadium: 'Stade de la Mosson', capacity: 22000, sellThrough: 61.32 },
+            { club: 'Angers SCO', stadium: 'Stade Raymond-Kopa', capacity: 19350, sellThrough: 67.94 },
+            { club: 'AS Monaco', stadium: 'Stade Louis-II', capacity: 18525, sellThrough: 50.53 }
+        ];
+
+        // Eredivisie Data
+        const eredivisie = [
+            { club: 'Ajax Amsterdam', stadium: 'Johan Cruijff ArenA', capacity: 55885, sellThrough: 97.40 },
+            { club: 'Feyenoord Rotterdam', stadium: 'Stadion Feyenoord "De Kuip"', capacity: 47500, sellThrough: 99.44 },
+            { club: 'PSV Eindhoven', stadium: 'Philips Stadion', capacity: 35000, sellThrough: 97.34 },
+            { club: 'Twente Enschede FC', stadium: 'De Grolsch Veste', capacity: 30205, sellThrough: 98.20 },
+            { club: 'SC Heerenveen', stadium: 'Abe Lenstra Stadion', capacity: 27224, sellThrough: 85.91 },
+            { club: 'FC Groningen', stadium: 'Euroborg', capacity: 22550, sellThrough: 98.63 },
+            { club: 'FC Utrecht', stadium: 'Stadion "Galgenwaard"', capacity: 23750, sellThrough: 92.42 },
+            { club: 'NAC Breda', stadium: 'Rat Verlegh Stadion', capacity: 20500, sellThrough: 90.66 },
+            { club: 'AZ Alkmaar', stadium: 'AFAS Stadion', capacity: 19500, sellThrough: 91.89 },
+            { club: 'PEC Zwolle', stadium: 'MAC³PARK stadion', capacity: 14000, sellThrough: 98.31 },
+            { club: 'Willem II Tilburg', stadium: 'Koning Willem II Stadion', capacity: 14700, sellThrough: 89.21 },
+            { club: 'NEC Nijmegen', stadium: 'Goffertstadion', capacity: 12650, sellThrough: 99.60 },
+            { club: 'Heracles Almelo', stadium: 'Asito Stadion', capacity: 12242, sellThrough: 92.98 },
+            { club: 'Fortuna Sittard', stadium: 'Fortuna Sittard Stadion', capacity: 12800, sellThrough: 82.72 },
+            { club: 'Sparta Rotterdam', stadium: 'Sparta-stadion - Het Kasteel', capacity: 10599, sellThrough: 94.15 },
+            { club: 'Go Ahead Eagles', stadium: 'De Adelaarshorst', capacity: 10400, sellThrough: 94.31 },
+            { club: 'RKC Waalwijk', stadium: 'Mandemakers Stadion', capacity: 7186, sellThrough: 95.41 },
+            { club: 'Almere City FC', stadium: 'Yanmar Stadion', capacity: 4501, sellThrough: 83.76 }
+        ];
+
+        // Primeira Liga Data
+        const primeiraLiga = [
+            { club: 'SL Benfica', stadium: 'Estádio da Luz', capacity: 68100, sellThrough: 86.26 },
+            { club: 'Sporting CP', stadium: 'Estádio José Alvalade', capacity: 52095, sellThrough: 81.64 },
+            { club: 'FC Porto', stadium: 'Estádio do Dragão', capacity: 50033, sellThrough: 81.17 },
+            { club: 'Vitória Guimarães SC', stadium: 'Estádio D. Afonso Henriques', capacity: 30029, sellThrough: 61.44 },
+            { club: 'SC Braga', stadium: 'Estádio Municipal de Braga', capacity: 30286, sellThrough: 45.79 },
+            { club: 'Boavista FC', stadium: 'Estádio do Bessa Século XXI', capacity: 28263, sellThrough: 25.52 },
+            { club: 'SC Farense', stadium: 'Estádio de São Luís', capacity: 7000, sellThrough: 102.36 },
+            { club: 'Gil Vicente FC', stadium: 'Estádio Cidade de Barcelos', capacity: 12046, sellThrough: 45.63 },
+            { club: 'FC Famalicão', stadium: 'Estádio Municipal de Famalicão', capacity: 5186, sellThrough: 72.90 },
+            { club: 'CF Estrela Amadora', stadium: 'Estádio José Gomes', capacity: 9288, sellThrough: 39.88 },
+            { club: 'CD Santa Clara', stadium: 'Estádio de São Miguel', capacity: 12500, sellThrough: 26.14 },
+            { club: 'GD Estoril Praia', stadium: 'Estádio António Coimbra da Mota', capacity: 5094, sellThrough: 53.45 },
+            { club: 'Rio Ave FC', stadium: 'Estádio do Rio Ave FC', capacity: 5300, sellThrough: 48.89 },
+            { club: 'Avs Futebol', stadium: 'Estádio do Clube Desportivo das Aves', capacity: 6230, sellThrough: 38.63 },
+            { club: 'CD Nacional', stadium: 'Estádio da Madeira', capacity: 5200, sellThrough: 46.08 },
+            { club: 'Moeirense FC', stadium: 'Estádio C. J. de Almeida Freitas', capacity: 6150, sellThrough: 38.80 },
+            { club: 'FC Arouca', stadium: 'Estádio Municipal de Arouca', capacity: 5600, sellThrough: 37.66 },
+            { club: 'Casa Pia AC', stadium: 'Estádio Municipal de Rio Maior', capacity: 7000, sellThrough: 29.19 }
+        ];
+
+        // Swiss Super League Data
+        const swissSuperLeague = [
+            { club: 'BSC Young Boys', stadium: 'Stadion Wankdorf', capacity: 31500, sellThrough: 90.42 },
+            { club: 'FC Basel 1893', stadium: 'St. Jakob-Park', capacity: 38512, sellThrough: 67.87 },
+            { club: 'FC St. Gallen 1879', stadium: 'kybunpark', capacity: 20660, sellThrough: 87.51 },
+            { club: 'FC Zürich', stadium: 'Stadion Letzigrund', capacity: 26104, sellThrough: 58.31 },
+            { club: 'FC Luzern', stadium: 'swissporarena', capacity: 15680, sellThrough: 77.00 },
+            { club: 'Servette FC', stadium: 'Stade de Genève', capacity: 30084, sellThrough: 33.01 },
+            { club: 'FC Sion', stadium: 'Tourbillon', capacity: 14850, sellThrough: 66.88 },
+            { club: 'FC Winterthur', stadium: 'Schützenwiese', capacity: 8700, sellThrough: 92.70 },
+            { club: 'FC Lausanne-Sport', stadium: 'Stade de la Tuilière', capacity: 12544, sellThrough: 55.03 },
+            { club: 'Grasshopper Club Zurich', stadium: 'Stadion Letzigrund', capacity: 26104, sellThrough: 26.35 },
+            { club: 'FC Lugano', stadium: 'Stadio di Cornaredo', capacity: 4900, sellThrough: 79.24 },
+            { club: 'Yverdon Sport FC', stadium: 'Stade Municipal', capacity: 4200, sellThrough: 65.95 }
+        ];
+
+        // Eliteserien (Norway) Data
+        const eliteserien = [
+            { club: 'SK Brann', stadium: 'Brann Stadion', capacity: 17500, sellThrough: 93.47 },
+            { club: 'Rosenborg BK', stadium: 'Lerkendal Stadion', capacity: 21510, sellThrough: 69.41 },
+            { club: 'Viking FK', stadium: 'Lyse Arena', capacity: 15900, sellThrough: 84.42 },
+            { club: 'Vålerenga Fotball Elite', stadium: 'Intility Arena', capacity: 16556, sellThrough: 70.75 },
+            { club: 'Fredrikstad FK', stadium: 'Fredrikstad Stadion', capacity: 12560, sellThrough: 73.52 },
+            { club: 'FK Bodø/Glimt', stadium: 'Aspmyra Stadion', capacity: 8500, sellThrough: 81.46 },
+            { club: 'Molde FK', stadium: 'Aker Stadion', capacity: 11800, sellThrough: 52.14 },
+            { club: 'Strømsgodset IF', stadium: 'Marienlyst Stadion', capacity: 8935, sellThrough: 59.48 },
+            { club: 'Tromsø IL', stadium: 'Romssa Arena', capacity: 7500, sellThrough: 66.59 },
+            { club: 'Sandefjord Fotball', stadium: 'Jotun Arena', capacity: 8000, sellThrough: 60.99 },
+            { club: 'Sarpsborg 08 FF', stadium: 'Sarpsborg Stadion', capacity: 8022, sellThrough: 60.21 },
+            { club: 'Hamarkameratene', stadium: 'Briskeby Stadion', capacity: 6500, sellThrough: 63.82 },
+            { club: 'FK Haugesund', stadium: 'Haugesund Sparebank Arena', capacity: 8983, sellThrough: 42.82 },
+            { club: 'Kristiansund BK', stadium: 'Nordmøre stadion', capacity: 4444, sellThrough: 74.30 },
+            { club: 'Bryne FK', stadium: 'Bryne Stadion', capacity: 5500, sellThrough: 56.04 },
+            { club: 'KFUM-Kameratene Oslo', stadium: 'KFUM Arena', capacity: 3300, sellThrough: 66.94 }
+        ];
+
+        // Serie B Data
+        const serieB = [
+            { club: 'UC Sampdoria', stadium: 'Luigi Ferraris', capacity: 33205, sellThrough: 70.42 },
+            { club: 'Palermo FC', stadium: 'Comunale Renzo Barbera "La Favorita"', capacity: 36365, sellThrough: 56.36 },
+            { club: 'SSC Bari', stadium: 'San Nicola', capacity: 58270, sellThrough: 27.28 },
+            { club: 'US Salernitana 1919', stadium: 'Arechi', capacity: 29739, sellThrough: 44.60 },
+            { club: 'Cesena FC', stadium: 'Orogel Stadium - Dino Manuzzi', capacity: 23860, sellThrough: 49.28 },
+            { club: 'Frosinone Calcio', stadium: 'Benito Stirpe', capacity: 16227, sellThrough: 64.20 },
+            { club: 'AC Reggiana 1919', stadium: 'Mapei Stadium - Città del Tricolore', capacity: 21584, sellThrough: 45.35 },
+            { club: 'Modena FC', stadium: 'Alberto Braglia', capacity: 21151, sellThrough: 46.05 },
+            { club: 'US Catanzaro', stadium: 'Nicola Ceravolo', capacity: 14650, sellThrough: 64.53 },
+            { club: 'Spezia Calcio', stadium: 'Alberto Picco', capacity: 12273, sellThrough: 74.16 },
+            { club: 'US Cremonese', stadium: 'Giovanni Zini', capacity: 16003, sellThrough: 55.86 },
+            { club: 'Pisa Sporting Club', stadium: 'Cetilar® Arena', capacity: 12508, sellThrough: 70.83 },
+            { club: 'Mantova 1911', stadium: 'Danilo Martelli', capacity: 11219, sellThrough: 77.80 },
+            { club: 'Brescia Calcio', stadium: 'Mario Rigamonti', capacity: 19550, sellThrough: 32.19 },
+            { club: 'US Sassuolo', stadium: 'Mapei Stadium - Città del Tricolore', capacity: 21584, sellThrough: 25.80 },
+            { club: 'Cosenza Calcio', stadium: 'San Vito-Luigi Marulla', capacity: 24479, sellThrough: 21.16 },
+            { club: 'SS Juve Stabia', stadium: 'Romeo Menti', capacity: 7114, sellThrough: 64.08 },
+            { club: 'FC Südtirol', stadium: 'Druso', capacity: 5500, sellThrough: 70.49 },
+            { club: 'Carrarese Calcio 1908', stadium: 'Comunale dei Marmi', capacity: 9500, sellThrough: 37.54 },
+            { club: 'AS Cittadella', stadium: 'Piercesare Tombolato', capacity: 7623, sellThrough: 46.59 }
+        ];
+
+        // Scottish Championship Data
+        const scottishChampionship = [
+            { club: 'Falkirk FC', stadium: 'The Falkirk Stadium', capacity: 7937, sellThrough: 81.20 },
+            { club: 'Dunfermline Athletic FC', stadium: 'KDM Group East End Park', capacity: 11480, sellThrough: 48.56 },
+            { club: 'Partick Thistle FC', stadium: 'The Energy Check Stadium at Firhill', capacity: 10102, sellThrough: 38.90 },
+            { club: 'Raith Rovers FC', stadium: 'Stark\'s Park', capacity: 8867, sellThrough: 44.81 },
+            { club: 'Ayr United FC', stadium: 'Somerset Park', capacity: 10185, sellThrough: 27.67 },
+            { club: 'Livingston FC', stadium: 'Home of the Set Fare Arena', capacity: 9512, sellThrough: 28.12 },
+            { club: 'Greenock Morton FC', stadium: 'Cappielow Park', capacity: 11569, sellThrough: 18.21 },
+            { club: 'Queen\'s Park FC', stadium: 'Hampden Park', capacity: 52500, sellThrough: 2.99 },
+            { club: 'Hamilton Academical FC', stadium: 'ZLX Stadium', capacity: 6018, sellThrough: 23.03 },
+            { club: 'Airdrieonians FC', stadium: 'Albert Bartlett Stadium', capacity: 10101, sellThrough: 16.22 }
+        ];
+
+        // Belgian Jupiler Pro League Data
+        const jupilerProLeague = [
+            { club: 'Club Brugge KV', stadium: 'Jan Breydel', capacity: 29062, sellThrough: 74.35 },
+            { club: 'Standard Liège', stadium: 'Maurice Dufrasne Stadion', capacity: 27221, sellThrough: 61.45 },
+            { club: 'KRC Genk', stadium: 'Cegeka Arena', capacity: 23718, sellThrough: 67.10 },
+            { club: 'RSC Anderlecht', stadium: 'Lotto Park', capacity: 21900, sellThrough: 76.61 },
+            { club: 'KAA Gent', stadium: 'Planet Group arena', capacity: 20185, sellThrough: 68.54 },
+            { club: 'KV Mechelen', stadium: 'Achter de Kazerne', capacity: 16672, sellThrough: 79.94 },
+            { club: 'Royal Antwerp FC', stadium: 'Bosuilstadion', capacity: 21000, sellThrough: 60.17 },
+            { club: 'Royal Charleroi SC', stadium: 'Stade du Pays de Charleroi', capacity: 14968, sellThrough: 49.91 },
+            { club: 'KV Kortrijk', stadium: 'Guldensporenstadion', capacity: 8974, sellThrough: 76.43 },
+            { club: 'Union Saint-Gilloise', stadium: 'Stade Joseph Mariën', capacity: 9512, sellThrough: 68.64 },
+            { club: 'Oud-Heverlee Leuven', stadium: 'King Power at Den Dreef Stadion', capacity: 9809, sellThrough: 64.66 },
+            { club: 'KVC Westerlo', stadium: 'Het Kuipje', capacity: 8035, sellThrough: 73.22 },
+            { club: 'Sint-Truidense VV', stadium: 'Daio Wasabi Stayen Stadium', capacity: 11337, sellThrough: 51.71 },
+            { club: 'Beerschot VA', stadium: 'Olympisch Stadion', capacity: 12771, sellThrough: 44.41 },
+            { club: 'Cercle Brugge', stadium: 'Jan Breydel', capacity: 29062, sellThrough: 18.45 },
+            { club: 'FCV Dender EH', stadium: 'Dender Football Complex', capacity: 6429, sellThrough: 52.97 }
+        ];
+
+        // 2. Bundesliga Data
+        const bundesliga2 = [
+            { club: 'FC Schalke 04', stadium: 'Veltins-Arena', capacity: 62278, sellThrough: 98.97 },
+            { club: 'Hamburger SV', stadium: 'Volksparkstadion', capacity: 57000, sellThrough: 98.81 },
+            { club: 'Hertha BSC', stadium: 'Olympiastadion Berlin', capacity: 74667, sellThrough: 71.22 },
+            { club: '1.FC Köln', stadium: 'RheinEnergieSTADION', capacity: 50000, sellThrough: 99.86 },
+            { club: '1.FC Kaiserslautern', stadium: 'Fritz-Walter-Stadion', capacity: 49350, sellThrough: 93.92 },
+            { club: 'Fortuna Düsseldorf', stadium: 'MERKUR SPIEL-ARENA', capacity: 54600, sellThrough: 75.98 },
+            { club: 'Hannover 96', stadium: 'Heinz-von-Heiden-Arena', capacity: 49000, sellThrough: 78.16 },
+            { club: '1.FC Nuremberg', stadium: 'Max-Morlock-Stadion', capacity: 50000, sellThrough: 74.82 },
+            { club: 'Karlsruher SC', stadium: 'BBBank Wildpark', capacity: 33180, sellThrough: 88.89 },
+            { club: '1.FC Magdeburg', stadium: 'Avnet-Arena', capacity: 30098, sellThrough: 84.06 },
+            { club: 'Eintracht Braunschweig', stadium: 'EINTRACHT-Stadion', capacity: 23325, sellThrough: 90.38 },
+            { club: 'SV Darmstadt 98', stadium: 'Merck-Stadion am Böllenfalltor', capacity: 17810, sellThrough: 97.95 },
+            { club: 'SSV Ulm 1846', stadium: 'Donaustadion', capacity: 17400, sellThrough: 90.78 },
+            { club: 'SC Paderborn 07', stadium: 'Home Deluxe Arena', capacity: 15000, sellThrough: 94.16 },
+            { club: 'SpVgg Greuther Fürth', stadium: 'Sportpark Ronhof | Thomas Sommer', capacity: 16626, sellThrough: 78.62 },
+            { club: 'SSV Jahn Regensburg', stadium: 'Jahnstadion Regensburg', capacity: 15210, sellThrough: 83.02 },
+            { club: 'Preußen Münster', stadium: 'LVM-Preußenstadion', capacity: 12794, sellThrough: 95.78 },
+            { club: 'SV 07 Elversberg', stadium: 'Ursapharm-Arena an der Kaiserlinde', capacity: 9307, sellThrough: 101.96 }
+        ];
+
+        // Turkish Süper Lig Data
+        const superLig = [
+            { club: 'Galatasaray', stadium: 'Ali Sami Yen Spor Kompleksi RAMS Park', capacity: 53978, sellThrough: 79.12 },
+            { club: 'Fenerbahce', stadium: 'Chobani Stadyumu FB Şükrü Saracoğlu', capacity: 47430, sellThrough: 68.59 },
+            { club: 'Besiktas JK', stadium: 'Beşiktaş Park', capacity: 42445, sellThrough: 65.91 },
+            { club: 'Trabzonspor', stadium: 'Papara Park', capacity: 40980, sellThrough: 44.78 },
+            { club: 'Samsunspor', stadium: 'Samsun Yeni 19 Mayıs', capacity: 33303, sellThrough: 48.75 },
+            { club: 'Göztepe', stadium: 'Gürsel Aksel Stadyumu', capacity: 23376, sellThrough: 65.33 },
+            { club: 'Konyaspor', stadium: 'Medaş Konya Büyükşehir Stadyumu', capacity: 41600, sellThrough: 29.95 },
+            { club: 'Kayserispor', stadium: 'RHG Enertürk Enerji Stadyumu', capacity: 31856, sellThrough: 28.60 },
+            { club: 'Antalyaspor', stadium: 'Corendon Airlines Park Antalya Stadı', capacity: 29307, sellThrough: 25.81 },
+            { club: 'Gaziantep FK', stadium: 'Gaziantep Stadyumu', capacity: 30320, sellThrough: 20.20 },
+            { club: 'Sivasspor', stadium: 'BG Grup 4 Eylül Stadyumu', capacity: 27817, sellThrough: 22.12 },
+            { club: 'Caykur Rizespor', stadium: 'Çaykur Didi', capacity: 14850, sellThrough: 37.95 },
+            { club: 'Adana Demirspor', stadium: 'Yeni Adana Stadyumu', capacity: 30960, sellThrough: 16.55 },
+            { club: 'Hatayspor', stadium: 'Mersin Stadyumu', capacity: 25000, sellThrough: 15.18 },
+            { club: 'Alanyaspor', stadium: 'Alanya Oba Stadyumu', capacity: 9784, sellThrough: 38.79 },
+            { club: 'Eyüpspor', stadium: 'Recep Tayyip Erdoğan Stadyumu', capacity: 13797, sellThrough: 20.01 },
+            { club: 'Basaksehir FK', stadium: 'Başakşehir Fatih Terim', capacity: 17067, sellThrough: 14.51 },
+            { club: 'Bodrum FK', stadium: 'Bodrum İlçe Stadyumu', capacity: 4243, sellThrough: 64.51 },
+            { club: 'Kasimpasa', stadium: 'Recep Tayyip Erdoğan Stadyumu', capacity: 13797, sellThrough: 15.77 }
+        ];
+
+        let chart;
+
+        // Home games per season for each league (regular season)
+        const leagueHomeGames = {
+            'Premier League': 19,
+            'Championship': 23,
+            'League One': 23,
+            'League Two': 23,
+            'Scottish Premiership': 19,
+            'Serie A': 19,
+            'La Liga': 19,
+            'Bundesliga': 17,
+            'Ligue 1': 17,
+            'Eredivisie': 17,
+            'Primeira Liga': 17,
+            'Swiss Super League': 18,
+            'Eliteserien': 15,
+            'Serie B': 19,
+            'Scottish Championship': 18,
+            'Belgian Jupiler Pro League': 17,
+            '2. Bundesliga': 17,
+            'Süper Lig': 19
+        };
+
+        function createChart() {
+            const ctx = document.getElementById('capacityChart').getContext('2d');
+            
+            chart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [
+                {
+                    label: 'Premier League',
+                    data: premierLeague.map(d => ({ x: d.capacity, y: d.sellThrough, club: d.club, stadium: d.stadium })),
+                    backgroundColor: '#9333EA',
+                    borderColor: '#1A1A1A',
+                    borderWidth: 1.5,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                },
+                {
+                    label: 'Championship',
+                    data: championship.map(d => ({ x: d.capacity, y: d.sellThrough, club: d.club, stadium: d.stadium })),
+                    backgroundColor: '#F97316',
+                    borderColor: '#1A1A1A',
+                    borderWidth: 1.5,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                },
+                {
+                    label: 'League One',
+                    data: leagueOne.map(d => ({ x: d.capacity, y: d.sellThrough, club: d.club, stadium: d.stadium })),
+                    backgroundColor: '#10B981',
+                    borderColor: '#1A1A1A',
+                    borderWidth: 1.5,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                },
+                {
+                    label: 'League Two',
+                    data: leagueTwo.map(d => ({ x: d.capacity, y: d.sellThrough, club: d.club, stadium: d.stadium })),
+                    backgroundColor: '#3B82F6',
+                    borderColor: '#1A1A1A',
+                    borderWidth: 1.5,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                },
+                {
+                    label: 'Scottish Premiership',
+                    data: scottishPrem.map(d => ({ x: d.capacity, y: d.sellThrough, club: d.club, stadium: d.stadium })),
+                    backgroundColor: '#EF4444',
+                    borderColor: '#1A1A1A',
+                    borderWidth: 1.5,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                },
+                {
+                    label: 'Serie A',
+                    data: serieA.map(d => ({ x: d.capacity, y: d.sellThrough, club: d.club, stadium: d.stadium })),
+                    backgroundColor: '#14B8A6',
+                    borderColor: '#1A1A1A',
+                    borderWidth: 1.5,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                },
+                {
+                    label: 'La Liga',
+                    data: laLiga.map(d => ({ x: d.capacity, y: d.sellThrough, club: d.club, stadium: d.stadium })),
+                    backgroundColor: '#EC4899',
+                    borderColor: '#1A1A1A',
+                    borderWidth: 1.5,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                },
+                {
+                    label: 'Bundesliga',
+                    data: bundesliga.map(d => ({ x: d.capacity, y: d.sellThrough, club: d.club, stadium: d.stadium })),
+                    backgroundColor: '#F59E0B',
+                    borderColor: '#1A1A1A',
+                    borderWidth: 1.5,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                },
+                {
+                    label: 'Ligue 1',
+                    data: ligue1.map(d => ({ x: d.capacity, y: d.sellThrough, club: d.club, stadium: d.stadium })),
+                    backgroundColor: '#8B5CF6',
+                    borderColor: '#1A1A1A',
+                    borderWidth: 1.5,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                },
+                {
+                    label: 'Eredivisie',
+                    data: eredivisie.map(d => ({ x: d.capacity, y: d.sellThrough, club: d.club, stadium: d.stadium })),
+                    backgroundColor: '#06B6D4',
+                    borderColor: '#1A1A1A',
+                    borderWidth: 1.5,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                },
+                {
+                    label: 'Primeira Liga',
+                    data: primeiraLiga.map(d => ({ x: d.capacity, y: d.sellThrough, club: d.club, stadium: d.stadium })),
+                    backgroundColor: '#84CC16',
+                    borderColor: '#1A1A1A',
+                    borderWidth: 1.5,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                },
+                {
+                    label: 'Swiss Super League',
+                    data: swissSuperLeague.map(d => ({ x: d.capacity, y: d.sellThrough, club: d.club, stadium: d.stadium })),
+                    backgroundColor: '#6366F1',
+                    borderColor: '#1A1A1A',
+                    borderWidth: 1.5,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                },
+                {
+                    label: 'Eliteserien',
+                    data: eliteserien.map(d => ({ x: d.capacity, y: d.sellThrough, club: d.club, stadium: d.stadium })),
+                    backgroundColor: '#F43F5E',
+                    borderColor: '#1A1A1A',
+                    borderWidth: 1.5,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                },
+                {
+                    label: 'Serie B',
+                    data: serieB.map(d => ({ x: d.capacity, y: d.sellThrough, club: d.club, stadium: d.stadium })),
+                    backgroundColor: '#0EA5E9',
+                    borderColor: '#1A1A1A',
+                    borderWidth: 1.5,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                },
+                {
+                    label: 'Scottish Championship',
+                    data: scottishChampionship.map(d => ({ x: d.capacity, y: d.sellThrough, club: d.club, stadium: d.stadium })),
+                    backgroundColor: '#059669',
+                    borderColor: '#1A1A1A',
+                    borderWidth: 1.5,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                },
+                {
+                    label: 'Belgian Jupiler Pro League',
+                    data: jupilerProLeague.map(d => ({ x: d.capacity, y: d.sellThrough, club: d.club, stadium: d.stadium })),
+                    backgroundColor: '#64748B',
+                    borderColor: '#1A1A1A',
+                    borderWidth: 1.5,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                },
+                {
+                    label: '2. Bundesliga',
+                    data: bundesliga2.map(d => ({ x: d.capacity, y: d.sellThrough, club: d.club, stadium: d.stadium })),
+                    backgroundColor: '#991B1B',
+                    borderColor: '#1A1A1A',
+                    borderWidth: 1.5,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                },
+                {
+                    label: 'Süper Lig',
+                    data: superLig.map(d => ({ x: d.capacity, y: d.sellThrough, club: d.club, stadium: d.stadium })),
+                    backgroundColor: '#B45309',
+                    borderColor: '#1A1A1A',
+                    borderWidth: 1.5,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                }
+            ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const point = context.raw;
+                                    return [
+                                        `${point.club}`,
+                                        `${point.stadium}`,
+                                        `Capacity: ${point.x.toLocaleString()}`,
+                                        `Sell-Through: ${point.y.toFixed(2)}%`
+                                    ];
+                                }
+                            },
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: GOLD,
+                            bodyColor: '#fff',
+                            borderColor: GOLD,
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: false
+                        },
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 15,
+                                font: { size: 11, family: 'Montserrat' }
+                            },
+                            onClick: function(e, legendItem, legend) {
+                                const index = legendItem.datasetIndex;
+                                const ci = legend.chart;
+                                const meta = ci.getDatasetMeta(index);
+                                
+                                // Toggle visibility
+                                meta.hidden = meta.hidden === null ? !ci.data.datasets[index].hidden : null;
+                                ci.update();
+                                
+                                // Recalculate summary stats
+                                calculateSummaryStats();
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Stadium Capacity',
+                                font: { size: 13, weight: '500', family: 'Montserrat' },
+                                color: NAVY
+                            },
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                }
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Sell-Through (%)',
+                                font: { size: 13, weight: '500', family: 'Montserrat' },
+                                color: NAVY
+                            },
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                            beginAtZero: true,
+                            max: 105
+                        }
+                    }
+                }
+            });
+        }
+
+        function calculateSummaryStats() {
+            // Get all league data arrays
+            const allLeagues = [
+                { name: 'Premier League', data: premierLeague },
+                { name: 'Championship', data: championship },
+                { name: 'League One', data: leagueOne },
+                { name: 'League Two', data: leagueTwo },
+                { name: 'Scottish Premiership', data: scottishPrem },
+                { name: 'Serie A', data: serieA },
+                { name: 'La Liga', data: laLiga },
+                { name: 'Bundesliga', data: bundesliga },
+                { name: 'Ligue 1', data: ligue1 },
+                { name: 'Eredivisie', data: eredivisie },
+                { name: 'Primeira Liga', data: primeiraLiga },
+                { name: 'Swiss Super League', data: swissSuperLeague },
+                { name: 'Eliteserien', data: eliteserien },
+                { name: 'Serie B', data: serieB },
+                { name: 'Scottish Championship', data: scottishChampionship },
+                { name: 'Belgian Jupiler Pro League', data: jupilerProLeague },
+                { name: '2. Bundesliga', data: bundesliga2 },
+                { name: 'Süper Lig', data: superLig }
+            ];
+
+            // Calculate seasonal totals and track number of games
+            let totalCapacitySeasonal = 0;
+            let totalSoldSeasonal = 0;
+            let totalGamesPlayed = 0;
+
+            if (chart && chart.data && chart.data.datasets) {
+                chart.data.datasets.forEach((dataset, index) => {
+                    const meta = chart.getDatasetMeta(index);
+                    if (!meta.hidden) {
+                        // Find matching league data
+                        const league = allLeagues.find(l => l.name === dataset.label);
+                        if (league) {
+                            const homeGames = leagueHomeGames[league.name] || 19;
+                            const numClubs = league.data.length;
+                            
+                            league.data.forEach(club => {
+                                // Seasonal values (capacity × home games)
+                                const capacitySeasonal = club.capacity * homeGames;
+                                const soldSeasonal = (club.capacity * club.sellThrough / 100) * homeGames;
+                                
+                                totalCapacitySeasonal += capacitySeasonal;
+                                totalSoldSeasonal += soldSeasonal;
+                            });
+                            
+                            // Add to total games count (each club plays homeGames)
+                            totalGamesPlayed += (numClubs * homeGames);
+                        }
+                    }
+                });
+            } else {
+                // Fallback if chart not ready - show all
+                allLeagues.forEach(league => {
+                    const homeGames = leagueHomeGames[league.name] || 19;
+                    const numClubs = league.data.length;
+                    
+                    league.data.forEach(club => {
+                        const capacitySeasonal = club.capacity * homeGames;
+                        const soldSeasonal = (club.capacity * club.sellThrough / 100) * homeGames;
+                        
+                        totalCapacitySeasonal += capacitySeasonal;
+                        totalSoldSeasonal += soldSeasonal;
+                    });
+                    
+                    totalGamesPlayed += (numClubs * homeGames);
+                });
+            }
+
+            // Calculate per-game averages
+            const capacityPerGame = totalGamesPlayed > 0 ? totalCapacitySeasonal / totalGamesPlayed : 0;
+            const soldPerGame = totalGamesPlayed > 0 ? totalSoldSeasonal / totalGamesPlayed : 0;
+
+            const avgSellThrough = totalCapacitySeasonal > 0 ? (totalSoldSeasonal / totalCapacitySeasonal) * 100 : 0;
+            const unsoldInventorySeasonal = totalCapacitySeasonal - totalSoldSeasonal;
+            const unsoldInventoryPerGame = capacityPerGame - soldPerGame;
+
+            // Update DOM with seasonal totals (bold) and per-game averages (smaller, below)
+            document.getElementById('totalCapacity').innerHTML = 
+                totalCapacitySeasonal.toLocaleString() + '<br><span style="font-size: 14px; font-weight: 400; opacity: 0.7;">(' + Math.round(capacityPerGame).toLocaleString() + ' per game)</span>';
+            
+            document.getElementById('totalSold').innerHTML = 
+                Math.round(totalSoldSeasonal).toLocaleString() + '<br><span style="font-size: 14px; font-weight: 400; opacity: 0.7;">(' + Math.round(soldPerGame).toLocaleString() + ' per game)</span>';
+            
+            document.getElementById('avgSellThrough').textContent = avgSellThrough.toFixed(2) + '%';
+            
+            document.getElementById('unsoldInventory').innerHTML = 
+                Math.round(unsoldInventorySeasonal).toLocaleString() + '<br><span style="font-size: 14px; font-weight: 400; opacity: 0.7;">(' + Math.round(unsoldInventoryPerGame).toLocaleString() + ' per game)</span>';
+        }
+
+        function clearAll() {
+            chart.data.datasets.forEach((dataset, index) => {
+                chart.getDatasetMeta(index).hidden = true;
+            });
+            chart.update();
+            calculateSummaryStats();
+        }
+
+        function showAll() {
+            chart.data.datasets.forEach((dataset, index) => {
+                chart.getDatasetMeta(index).hidden = false;
+            });
+            chart.update();
+            calculateSummaryStats();
+        }
+
+        window.onload = function() { 
+            createChart(); 
+            calculateSummaryStats();
+        };
+    </script>
+</body>
+</html>
