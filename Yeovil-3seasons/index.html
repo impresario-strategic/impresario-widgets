@@ -138,7 +138,9 @@
             { match: 6, date: '27 Sep 2025', day: 'Saturday', opponent: 'Altrincham', attendance: 2607, result: '1-0', opponentPos: 15 },
             { match: 7, date: '04 Oct 2025', day: 'Saturday', opponent: 'Boreham Wood', attendance: 2660, result: '0-3', opponentPos: 4 },
             { match: 8, date: '25 Oct 2025', day: 'Saturday', opponent: 'Carlisle United', attendance: 2933, result: '1-1', opponentPos: 3 },
-            { match: 9, date: '04 Nov 2025', day: 'Tuesday', opponent: 'Wealdstone', attendance: 2337, result: '0-2', opponentPos: 14 }
+            { match: 9, date: '04 Nov 2025', day: 'Tuesday', opponent: 'Wealdstone', attendance: 2337, result: '0-2', opponentPos: 14 },
+            { match: 10, date: '15 Nov 2025', day: 'Saturday', opponent: 'Southend United', attendance: 3060, result: '0-1', opponentPos: 7 },
+            { match: 11, date: '29 Nov 2025', day: 'Saturday', opponent: 'Boston Utd', attendance: 2921, result: '2-1', opponentPos: 16 }
         ];
 
         let capacity = 9565;
@@ -378,23 +380,25 @@
                             filter: function(tooltipItem) { return tooltipItem.datasetIndex === 0 || tooltipItem.datasetIndex === 2 || tooltipItem.datasetIndex === 4; },
                             callbacks: {
                                 title: function(context) {
+                                    if (!context || !context[0]) return '';
                                     const datasetIndex = context[0].datasetIndex;
                                     const matchIndex = context[0].dataIndex;
                                     var matchData;
-                                    if (datasetIndex === 0) matchData = matchData2023[matchIndex];
-                                    else if (datasetIndex === 2) matchData = matchData2024[matchIndex];
-                                    else if (datasetIndex === 4) matchData = matchData2025[matchIndex];
-                                    if (matchData) return 'Match ' + matchData.match + ': vs ' + matchData.opponent;
+                                    if (datasetIndex === 0 && matchData2023[matchIndex]) matchData = matchData2023[matchIndex];
+                                    else if (datasetIndex === 2 && matchData2024[matchIndex]) matchData = matchData2024[matchIndex];
+                                    else if (datasetIndex === 4 && matchData2025[matchIndex]) matchData = matchData2025[matchIndex];
+                                    if (matchData && matchData.match && matchData.opponent) return 'Match ' + matchData.match + ': vs ' + matchData.opponent;
                                     return '';
                                 },
                                 label: function(context) {
+                                    if (!context) return '';
                                     const datasetIndex = context.datasetIndex;
                                     const matchIndex = context.dataIndex;
                                     var matchData, year;
-                                    if (datasetIndex === 0) { matchData = matchData2023[matchIndex]; year = '2023-24'; }
-                                    else if (datasetIndex === 2) { matchData = matchData2024[matchIndex]; year = '2024-25'; }
-                                    else if (datasetIndex === 4) { matchData = matchData2025[matchIndex]; year = '2025-26'; }
-                                    if (matchData) {
+                                    if (datasetIndex === 0 && matchData2023[matchIndex]) { matchData = matchData2023[matchIndex]; year = '2023-24'; }
+                                    else if (datasetIndex === 2 && matchData2024[matchIndex]) { matchData = matchData2024[matchIndex]; year = '2024-25'; }
+                                    else if (datasetIndex === 4 && matchData2025[matchIndex]) { matchData = matchData2025[matchIndex]; year = '2025-26'; }
+                                    if (matchData && matchData.attendance && matchData.date && matchData.day && matchData.result) {
                                         const pct = ((matchData.attendance / capacity) * 100).toFixed(1);
                                         return [
                                             'Season: ' + year,
