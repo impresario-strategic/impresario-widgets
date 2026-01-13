@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barnsley FC: Season Attendance Comparison | Impresario Strategic</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <style>
+        * { font-family: 'Montserrat', sans-serif; }
+        body { margin: 0; padding: 20px; background-color: #f8f8f8; min-height: 100vh; box-sizing: border-box; }
+        .container { max-width: 1300px; margin: 0 auto; }
+        .chart-wrapper { background-color: #ffffff; border-radius: 8px; padding: 24px; position: relative; box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        h1 { color: #07385E; text-align: center; margin-bottom: 8px; font-size: 22px; font-weight: 600; }
+        .subtitle { text-align: center; color: rgba(26, 26, 26, 0.6); margin-bottom: 24px; font-size: 14px; }
+        #chartContainer { position: relative; height: 550px; margin-bottom: 20px; }
+        .branding { position: absolute; bottom: 24px; right: 24px; display: flex; align-items: center; gap: 8px; opacity: 0.5; }
+        .branding-text { color: #07385E; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; }
+        .branding-icon { width: 24px; height: 24px; }
+        .comparison-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 20px; }
+        .year-section { background-color: #f8f8f8; padding: 20px; border-radius: 8px; border-left: 4px solid #07385E; }
+        .year-section.year-2023 { border-left-color: #9BB8CA; }
+        .year-section.year-2024 { border-left-color: #4A7BA7; }
+        .year-section.year-2025 { border-left-color: #07385E; }
+        .year-section h3 { margin: 0 0 16px 0; font-size: 14px; font-weight: 600; }
+        .year-section.year-2023 h3 { color: #9BB8CA; }
+        .year-section.year-2024 h3 { color: #4A7BA7; }
+        .year-section.year-2025 h3 { color: #07385E; }
+        .stat-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(7, 56, 94, 0.1); font-size: 13px; color: rgba(26, 26, 26, 0.7); }
+        .stat-row:last-child { border-bottom: none; }
+        .stat-row strong { color: #1A1A1A; }
+        .input-section { background-color: #f8f8f8; padding: 16px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; }
+        .input-section label { font-weight: 500; color: #07385E; font-size: 13px; }
+        .input-section input[type="number"] { padding: 8px 12px; border: 1px solid rgba(7, 56, 94, 0.2); border-radius: 4px; font-size: 14px; width: 100px; font-family: 'Montserrat', sans-serif; }
+        .input-section button { background-color: #07385E; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 500; font-family: 'Montserrat', sans-serif; }
+        .input-section button:hover { background-color: #0a4a7a; }
+        .summary-box { background-color: rgba(213, 195, 147, 0.15); border-left: 4px solid #D5C393; padding: 16px 20px; border-radius: 0 8px 8px 0; margin-bottom: 20px; }
+        .summary-box h4 { margin: 0 0 12px 0; color: #07385E; font-size: 14px; font-weight: 600; }
+        .summary-box p { margin: 0 0 8px 0; font-size: 13px; color: rgba(26, 26, 26, 0.7); line-height: 1.5; }
+        .summary-box p:last-child { margin-bottom: 0; }
+        @media (max-width: 1024px) { .comparison-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="chart-wrapper">
+            <h1>Barnsley FC: Season Attendance Comparison</h1>
+            <p class="subtitle">Three-season attendance analysis at Oakwell (2023-24, 2024-25 & 2025-26)</p>
+            
+            <div class="input-section">
+                <label for="capacityInput">Stadium Capacity:</label>
+                <input type="number" id="capacityInput" value="24009" min="20000" max="30000">
+                <button onclick="updateChart()">Update</button>
+            </div>
+
+            <div class="summary-box" id="summaryBox"></div>
+
+            <div id="chartContainer">
+                <canvas id="comparisonChart"></canvas>
+            </div>
+
+            <div class="branding">
+                <svg class="branding-icon" viewBox="0 0 25400 25400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="#07385E" fill-rule="nonzero" d="M14589.56 9160.1c967.54,373.75 1796.66,1026.13 2388.22,1858.26 609.4,857.37 968.01,1904.97 968.01,3035.47 0,1130.38 -358.61,2178.21 -968.13,3035.57 -625.38,879.72 -1516.27,1558.47 -2555.39,1919.56l-330.52 114.87 0 -9611.37c-194.16,-59.39 -394.28,-106.77 -599.29,-141.23 -255.14,-42.92 -520.04,-65.37 -792.46,-65.37 -272.42,0 -537.32,22.45 -792.46,65.37 -205.01,34.46 -405.13,81.84 -599.29,141.23l0 9611.37 -330.5 -114.87c-1039.14,-361.09 -1930.01,-1039.84 -2555.41,-1919.56 -609.52,-857.36 -968.13,-1905.19 -968.13,-3035.57 0,-1130.5 358.61,-2178.1 968.01,-3035.47 591.69,-832.24 1420.7,-1484.49 2388.22,-1858.24l0 -2883.97 3779.12 0 0 248.91 0 2635.04zm-497.81 -164.17l0 -11.99 0 -2209.98 -2783.5 0 0 2209.98 0 11.99c169.66,-46.8 342.39,-85.13 517.69,-114.53 286.42,-48.19 578.82,-73.36 874.06,-73.36 295.24,0 587.64,25.17 874.06,73.36 175.32,29.4 348.03,67.73 517.69,114.53zm2481.58 2310.26c-499.13,-702.29 -1184.58,-1263.01 -1983.77,-1610.1l0 8715.46c799.07,-346.97 1484.52,-907.68 1983.64,-1609.97 550.73,-774.71 874.78,-1723.07 874.78,-2747.75 0,-1024.8 -324.05,-1973.05 -874.65,-2747.64zm-7746.53 5495.39c499.12,702.29 1184.59,1263 1983.64,1609.97l0 -8715.46c-799.17,347.09 -1484.64,907.81 -1983.75,1610.1 -550.62,774.59 -874.64,1722.84 -874.64,2747.64 0,1024.68 324.02,1973.04 874.75,2747.75z"/>
+                </svg>
+                <span class="branding-text">Impresario Strategic</span>
+            </div>
+
+            <div class="comparison-grid">
+                <div class="year-section year-2023" id="stats2023"></div>
+                <div class="year-section year-2024" id="stats2024"></div>
+                <div class="year-section year-2025" id="stats2025"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const NAVY = '#07385E', GOLD = '#D5C393', NAVY_MED = '#4A7BA7', NAVY_LIGHT = '#9BB8CA';
+        
+        const matchData2023 = [
+            { match: 1, date: '05 Aug 2023', day: 'Saturday', opponent: 'Port Vale', attendance: 13796, result: '7-0', opponentPos: 23 },
+            { match: 2, date: '15 Aug 2023', day: 'Tuesday', opponent: 'Peterborough', attendance: 11789, result: '1-3', opponentPos: 4 },
+            { match: 3, date: '19 Aug 2023', day: 'Saturday', opponent: 'Oxford United', attendance: 11753, result: '1-3', opponentPos: 6 },
+            { match: 4, date: '16 Sep 2023', day: 'Saturday', opponent: 'Burton Albion', attendance: 11533, result: '2-0', opponentPos: 20 },
+            { match: 5, date: '19 Sep 2023', day: 'Tuesday', opponent: 'Portsmouth', attendance: 11464, result: '2-3', opponentPos: 5 },
+            { match: 6, date: '30 Sep 2023', day: 'Saturday', opponent: 'Blackpool', attendance: 13005, result: '0-1', opponentPos: 14 },
+            { match: 7, date: '24 Oct 2023', day: 'Tuesday', opponent: 'Shrewsbury', attendance: 10889, result: '3-0', opponentPos: 16 },
+            { match: 8, date: '28 Oct 2023', day: 'Saturday', opponent: 'Fleetwood', attendance: 12141, result: '2-2', opponentPos: 22 },
+            { match: 9, date: '28 Nov 2023', day: 'Tuesday', opponent: 'Wycombe', attendance: 10466, result: '1-0', opponentPos: 11 },
+            { match: 10, date: '16 Dec 2023', day: 'Saturday', opponent: 'Charlton', attendance: 11716, result: '1-1', opponentPos: 10 },
+            { match: 11, date: '23 Dec 2023', day: 'Saturday', opponent: 'Stevenage', attendance: 12525, result: '2-1', opponentPos: 5 },
+            { match: 12, date: '01 Jan 2024', day: 'Monday', opponent: 'Wigan', attendance: 12836, result: '1-1', opponentPos: 15 },
+            { match: 13, date: '13 Jan 2024', day: 'Saturday', opponent: 'Bristol Rovers', attendance: 11786, result: '2-1', opponentPos: 11 },
+            { match: 14, date: '16 Jan 2024', day: 'Tuesday', opponent: 'Carlisle United', attendance: 11507, result: '2-1', opponentPos: 22 },
+            { match: 15, date: '27 Jan 2024', day: 'Saturday', opponent: 'Exeter City', attendance: 11858, result: '1-2', opponentPos: 16 },
+            { match: 16, date: '10 Feb 2024', day: 'Saturday', opponent: 'Leyton Orient', attendance: 12370, result: '2-1', opponentPos: 8 },
+            { match: 17, date: '24 Feb 2024', day: 'Saturday', opponent: 'Derby', attendance: 18332, result: '2-1', opponentPos: 3 },
+            { match: 18, date: '05 Mar 2024', day: 'Tuesday', opponent: 'Bolton', attendance: 14808, result: '2-2', opponentPos: 3 },
+            { match: 19, date: '09 Mar 2024', day: 'Saturday', opponent: 'Lincoln City', attendance: 14158, result: '1-5', opponentPos: 10 },
+            { match: 20, date: '16 Mar 2024', day: 'Saturday', opponent: 'Cheltenham', attendance: 12056, result: '0-0', opponentPos: 21 },
+            { match: 21, date: '29 Mar 2024', day: 'Friday', opponent: 'Cambridge Utd.', attendance: 13363, result: '0-2', opponentPos: 20 },
+            { match: 22, date: '13 Apr 2024', day: 'Saturday', opponent: 'Reading', attendance: 12405, result: '2-2', opponentPos: 17 },
+            { match: 23, date: '27 Apr 2024', day: 'Saturday', opponent: 'Northampton', attendance: 15108, result: '1-1', opponentPos: 14 }
+        ];
+
+        const matchData2024 = [
+            { match: 1, date: '09 Aug 2024', day: 'Friday', opponent: 'Mansfield Town', attendance: 14817, result: '1-2', opponentPos: 17 },
+            { match: 2, date: '24 Aug 2024', day: 'Saturday', opponent: 'Northampton', attendance: 11248, result: '2-2', opponentPos: 15 },
+            { match: 3, date: '07 Sep 2024', day: 'Saturday', opponent: 'Bristol Rovers', attendance: 11196, result: '2-1', opponentPos: 9 },
+            { match: 4, date: '28 Sep 2024', day: 'Saturday', opponent: 'Stockport', attendance: 14882, result: '1-1', opponentPos: 3 },
+            { match: 5, date: '01 Oct 2024', day: 'Tuesday', opponent: 'Wycombe', attendance: 9857, result: '2-2', opponentPos: 4 },
+            { match: 6, date: '22 Oct 2024', day: 'Tuesday', opponent: 'Charlton', attendance: 12441, result: '2-2', opponentPos: 10 },
+            { match: 7, date: '08 Nov 2024', day: 'Friday', opponent: 'Rotherham', attendance: 14731, result: '2-0', opponentPos: 16 },
+            { match: 8, date: '23 Nov 2024', day: 'Saturday', opponent: 'Wigan', attendance: 11438, result: '0-1', opponentPos: 18 },
+            { match: 9, date: '26 Nov 2024', day: 'Tuesday', opponent: 'Reading', attendance: 10011, result: '2-2', opponentPos: 18 },
+            { match: 10, date: '07 Dec 2024', day: 'Saturday', opponent: 'Birmingham', attendance: 15367, result: '1-2', opponentPos: 1 },
+            { match: 11, date: '21 Dec 2024', day: 'Saturday', opponent: 'Leyton Orient', attendance: 11373, result: '0-4', opponentPos: 14 },
+            { match: 12, date: '01 Jan 2025', day: 'Wednesday', opponent: 'Wrexham', attendance: 15248, result: '2-1', opponentPos: 2 },
+            { match: 13, date: '04 Jan 2025', day: 'Saturday', opponent: 'Crawley Town', attendance: 11016, result: '3-0', opponentPos: 20 },
+            { match: 14, date: '25 Jan 2025', day: 'Saturday', opponent: 'Stevenage', attendance: 10831, result: '0-1', opponentPos: 18 },
+            { match: 15, date: '01 Feb 2025', day: 'Saturday', opponent: 'Burton Albion', attendance: 10555, result: '0-0', opponentPos: 21 },
+            { match: 16, date: '15 Feb 2025', day: 'Saturday', opponent: 'Huddersfield', attendance: 15600, result: '1-2', opponentPos: 6 },
+            { match: 17, date: '01 Mar 2025', day: 'Saturday', opponent: 'Lincoln City', attendance: 11914, result: '4-3', opponentPos: 13 },
+            { match: 18, date: '08 Mar 2025', day: 'Saturday', opponent: 'Blackpool', attendance: 11563, result: '0-3', opponentPos: 11 },
+            { match: 19, date: '22 Mar 2025', day: 'Saturday', opponent: 'Cambridge Utd.', attendance: 10790, result: '1-1', opponentPos: 23 },
+            { match: 20, date: '01 Apr 2025', day: 'Tuesday', opponent: 'Exeter City', attendance: 10092, result: '1-2', opponentPos: 17 },
+            { match: 21, date: '12 Apr 2025', day: 'Saturday', opponent: 'Bolton', attendance: 13685, result: '4-1', opponentPos: 7 },
+            { match: 22, date: '21 Apr 2025', day: 'Monday', opponent: 'Peterborough', attendance: 11049, result: '1-1', opponentPos: 18 },
+            { match: 23, date: '26 Apr 2025', day: 'Saturday', opponent: 'Shrewsbury', attendance: 11159, result: '1-2', opponentPos: 24 }
+        ];
+
+        const matchData2025 = [
+            { match: 1, date: '09 Aug 2025', day: 'Saturday', opponent: 'Burton Albion', attendance: 12456, result: '3-2', opponentPos: 8 },
+            { match: 2, date: '16 Aug 2025', day: 'Saturday', opponent: 'Bolton', attendance: 13167, result: '1-1', opponentPos: 13 },
+            { match: 3, date: '30 Aug 2025', day: 'Saturday', opponent: 'Huddersfield', attendance: 15783, result: '3-1', opponentPos: 2 },
+            { match: 4, date: '13 Sep 2025', day: 'Saturday', opponent: 'Reading', attendance: 10803, result: '3-2', opponentPos: 18 },
+            { match: 5, date: '27 Sep 2025', day: 'Saturday', opponent: 'Port Vale', attendance: 10688, result: '0-2', opponentPos: 21 },
+            { match: 6, date: '25 Oct 2025', day: 'Saturday', opponent: 'Rotherham', attendance: 12468, result: '0-1', opponentPos: 15 },
+            { match: 7, date: '22 Nov 2025', day: 'Saturday', opponent: 'Luton', attendance: 10882, result: '5-0', opponentPos: 7 },
+            { match: 8, date: '13 Dec 2025', day: 'Saturday', opponent: 'Leyton Orient', attendance: 10232, result: '3-2', opponentPos: 12 },
+            { match: 9, date: '26 Dec 2025', day: 'Friday', opponent: 'Mansfield Town', attendance: 12856, result: '2-3', opponentPos: 21 },
+            { match: 10, date: '29 Dec 2025', day: 'Monday', opponent: 'Lincoln City', attendance: 10711, result: '0-2', opponentPos: 2 }
+        ];
+
+        let capacity = 24009;
+        let myChart;
+
+        function updateSummary(cap) {
+            const avg2023 = matchData2023.reduce((sum, m) => sum + m.attendance, 0) / matchData2023.length;
+            const avg2024 = matchData2024.reduce((sum, m) => sum + m.attendance, 0) / matchData2024.length;
+            const avg2025 = matchData2025.reduce((sum, m) => sum + m.attendance, 0) / matchData2025.length;
+
+            const util2023 = (avg2023 / cap * 100).toFixed(1);
+            const util2024 = (avg2024 / cap * 100).toFixed(1);
+            const util2025 = (avg2025 / cap * 100).toFixed(1);
+
+            const change2324 = ((avg2024 - avg2023) / avg2023 * 100).toFixed(1);
+            const change2425 = ((avg2025 - avg2024) / avg2024 * 100).toFixed(1);
+
+            let summary = `<h4>Attendance Summary</h4>`;
+            summary += `<p><strong>2023-24:</strong> Average attendance of ${Math.round(avg2023).toLocaleString()} (${util2023}% capacity) across 23 home matches.</p>`;
+            summary += `<p><strong>2024-25:</strong> Average attendance of ${Math.round(avg2024).toLocaleString()} (${util2024}% capacity) across 23 home matches — a ${change2324 > 0 ? 'decrease' : 'increase'} of ${Math.abs(change2324)}% from the previous season.</p>`;
+            summary += `<p><strong>2025-26 (to date):</strong> Average attendance of ${Math.round(avg2025).toLocaleString()} (${util2025}% capacity) across 10 home matches — tracking ${change2425 > 0 ? 'higher' : 'lower'} by ${Math.abs(change2425)}% compared to the previous season's average.</p>`;
+
+            document.getElementById('summaryBox').innerHTML = summary;
+        }
+
+        function updateStats(cap) {
+            function generateStats(data, elementId, year) {
+                if (data.length === 0) return;
+                const attendances = data.map(m => m.attendance);
+                const avg = attendances.reduce((a, b) => a + b, 0) / attendances.length;
+                const total = attendances.reduce((a, b) => a + b, 0);
+                const highest = Math.max(...attendances);
+                const lowest = Math.min(...attendances);
+                const avgPct = (avg / cap * 100).toFixed(1);
+
+                let html = `<h3>${year} Season (${data.length} matches)</h3>`;
+                html += `<div class="stat-row"><span>Average Attendance</span><strong>${Math.round(avg).toLocaleString()}</strong></div>`;
+                html += `<div class="stat-row"><span>Total Attendance</span><strong>${total.toLocaleString()}</strong></div>`;
+                html += `<div class="stat-row"><span>Highest Attendance</span><strong>${highest.toLocaleString()}</strong></div>`;
+                html += `<div class="stat-row"><span>Lowest Attendance</span><strong>${lowest.toLocaleString()}</strong></div>`;
+                html += `<div class="stat-row"><span>Avg. Capacity</span><strong>${avgPct}%</strong></div>`;
+
+                document.getElementById(elementId).innerHTML = html;
+            }
+
+            generateStats(matchData2023, 'stats2023', '2023-24');
+            generateStats(matchData2024, 'stats2024', '2024-25');
+            generateStats(matchData2025, 'stats2025', '2025-26');
+        }
+
+        function calculateTrendline(data) {
+            const n = data.length;
+            const validData = data.map((val, idx) => ({ x: idx + 1, y: val })).filter(d => d.y !== null);
+            if (validData.length < 2) return data.map(() => null);
+
+            const sumX = validData.reduce((sum, d) => sum + d.x, 0);
+            const sumY = validData.reduce((sum, d) => sum + d.y, 0);
+            const sumXY = validData.reduce((sum, d) => sum + d.x * d.y, 0);
+            const sumX2 = validData.reduce((sum, d) => sum + d.x * d.x, 0);
+
+            const slope = (validData.length * sumXY - sumX * sumY) / (validData.length * sumX2 - sumX * sumX);
+            const intercept = (sumY - slope * sumX) / validData.length;
+
+            return data.map((val, idx) => val !== null ? slope * (idx + 1) + intercept : null);
+        }
+
+        function createChart(cap) {
+            const attendances2023 = matchData2023.map(m => m.attendance);
+            const attendances2024 = matchData2024.map(m => m.attendance);
+            const attendances2025 = matchData2025.map(m => m.attendance);
+
+            const maxMatches = Math.max(matchData2023.length, matchData2024.length, matchData2025.length);
+            const labels = Array.from({ length: maxMatches }, (_, i) => i + 1);
+
+            const trend2023 = calculateTrendline(attendances2023);
+            const trend2024 = calculateTrendline(attendances2024);
+            const trend2025 = calculateTrendline(attendances2025);
+
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            if (myChart) myChart.destroy();
+
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '2023-24',
+                            data: attendances2023.concat(Array(maxMatches - attendances2023.length).fill(null)),
+                            borderColor: NAVY_LIGHT,
+                            backgroundColor: NAVY_LIGHT,
+                            borderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            tension: 0.1
+                        },
+                        {
+                            label: '2023-24 Trend',
+                            data: trend2023.concat(Array(maxMatches - trend2023.length).fill(null)),
+                            borderColor: NAVY_LIGHT,
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            pointRadius: 0,
+                            pointHoverRadius: 0,
+                            tension: 0,
+                            hidden: true
+                        },
+                        {
+                            label: '2024-25',
+                            data: attendances2024.concat(Array(maxMatches - attendances2024.length).fill(null)),
+                            borderColor: NAVY_MED,
+                            backgroundColor: NAVY_MED,
+                            borderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            tension: 0.1
+                        },
+                        {
+                            label: '2024-25 Trend',
+                            data: trend2024.concat(Array(maxMatches - trend2024.length).fill(null)),
+                            borderColor: NAVY_MED,
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            pointRadius: 0,
+                            pointHoverRadius: 0,
+                            tension: 0,
+                            hidden: true
+                        },
+                        {
+                            label: '2025-26',
+                            data: attendances2025.concat(Array(maxMatches - attendances2025.length).fill(null)),
+                            borderColor: NAVY,
+                            backgroundColor: NAVY,
+                            borderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            tension: 0.1
+                        },
+                        {
+                            label: '2025-26 Trend',
+                            data: trend2025.concat(Array(maxMatches - trend2025.length).fill(null)),
+                            borderColor: NAVY,
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            pointRadius: 0,
+                            pointHoverRadius: 0,
+                            tension: 0,
+                            hidden: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'nearest', intersect: false },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: { family: 'Montserrat', size: 12 },
+                                color: NAVY,
+                                padding: 15,
+                                usePointStyle: true,
+                                filter: function(legendItem, chartData) {
+                                    // Keep the toggle button (datasetIndex: -1) and regular datasets
+                                    // Remove individual trend line datasets
+                                    if (legendItem.datasetIndex === -1) return true;
+                                    return !legendItem.text.includes('Trend');
+                                },
+                                generateLabels: function(chart) {
+                                    const original = Chart.defaults.plugins.legend.labels.generateLabels(chart);
+                                    const trendlinesVisible = chart.trendlinesVisible || false;
+                                    const trendButton = {
+                                        text: trendlinesVisible ? '  Hide Trendlines  ' : '  Show Trendlines  ',
+                                        fillStyle: 'transparent',
+                                        strokeStyle: NAVY,
+                                        lineWidth: 2,
+                                        lineDash: [5, 5],
+                                        hidden: false,
+                                        index: 999,
+                                        datasetIndex: -1
+                                    };
+                                    return [...original.filter(item => !item.text.includes('Trend')), trendButton];
+                                }
+                            },
+                            onClick: function(e, legendItem, legend) {
+                                const ci = legend.chart;
+                                if (legendItem.datasetIndex === -1) {
+                                    // Toggle all trendlines
+                                    ci.trendlinesVisible = !ci.trendlinesVisible;
+                                    [1, 3, 5].forEach(function(i) {
+                                        ci.getDatasetMeta(i).hidden = !ci.trendlinesVisible;
+                                    });
+                                } else {
+                                    // Toggle both the attendance line and its trendline
+                                    const index = legendItem.datasetIndex;
+                                    const trendIndex = index + 1; // Trendline is always next dataset
+                                    const meta = ci.getDatasetMeta(index);
+                                    const trendMeta = ci.getDatasetMeta(trendIndex);
+                                    
+                                    const newHiddenState = meta.hidden === null ? !ci.data.datasets[index].hidden : null;
+                                    meta.hidden = newHiddenState;
+                                    trendMeta.hidden = newHiddenState;
+                                }
+                                ci.update();
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: NAVY,
+                            titleFont: { family: 'Montserrat', size: 13, weight: '600' },
+                            bodyFont: { family: 'Montserrat', size: 12 },
+                            padding: 12,
+                            cornerRadius: 4,
+                            filter: function(tooltipItem) { return tooltipItem.datasetIndex === 0 || tooltipItem.datasetIndex === 2 || tooltipItem.datasetIndex === 4; },
+                            callbacks: {
+                                title: function(context) {
+                                    if (!context || !context[0]) return '';
+                                    const datasetIndex = context[0].datasetIndex;
+                                    const matchIndex = context[0].dataIndex;
+                                    var matchData;
+                                    if (datasetIndex === 0 && matchData2023[matchIndex]) matchData = matchData2023[matchIndex];
+                                    else if (datasetIndex === 2 && matchData2024[matchIndex]) matchData = matchData2024[matchIndex];
+                                    else if (datasetIndex === 4 && matchData2025[matchIndex]) matchData = matchData2025[matchIndex];
+                                    if (matchData && matchData.match && matchData.opponent) return 'Match ' + matchData.match + ': vs ' + matchData.opponent;
+                                    return '';
+                                },
+                                label: function(context) {
+                                    if (!context) return '';
+                                    const datasetIndex = context.datasetIndex;
+                                    const matchIndex = context.dataIndex;
+                                    var matchData, year;
+                                    if (datasetIndex === 0 && matchData2023[matchIndex]) { matchData = matchData2023[matchIndex]; year = '2023-24'; }
+                                    else if (datasetIndex === 2 && matchData2024[matchIndex]) { matchData = matchData2024[matchIndex]; year = '2024-25'; }
+                                    else if (datasetIndex === 4 && matchData2025[matchIndex]) { matchData = matchData2025[matchIndex]; year = '2025-26'; }
+                                    if (matchData && matchData.attendance && matchData.date && matchData.day && matchData.result) {
+                                        const pct = ((matchData.attendance / capacity) * 100).toFixed(1);
+                                        return [
+                                            'Season: ' + year,
+                                            'Date: ' + matchData.date + ' (' + matchData.day + ')',
+                                            'Attendance: ' + matchData.attendance.toLocaleString(),
+                                            'Capacity: ' + pct + '%',
+                                            'Result: ' + matchData.result
+                                        ];
+                                    }
+                                    return '';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: Math.max(capacity, Math.max(...attendances2023.filter(a => a !== null), ...attendances2024.filter(a => a !== null), ...attendances2025.filter(a => a !== null)) * 1.1),
+                            ticks: { font: { family: 'Montserrat', size: 11 }, color: 'rgba(26, 26, 26, 0.6)', callback: function(value) { return value.toLocaleString(); } },
+                            grid: { color: 'rgba(7, 56, 94, 0.08)' }
+                        },
+                        x: {
+                            ticks: { font: { family: 'Montserrat', size: 11 }, color: 'rgba(26, 26, 26, 0.6)' },
+                            grid: { display: false }
+                        }
+                    }
+                },
+                plugins: [{
+                    id: 'capacityLine',
+                    beforeDraw: function(chart) {
+                        const ctx = chart.ctx;
+                        const yAxis = chart.scales.y;
+                        const xAxis = chart.scales.x;
+                        const yCapacity = yAxis.getPixelForValue(capacity);
+                        ctx.save();
+                        ctx.strokeStyle = GOLD;
+                        ctx.lineWidth = 2;
+                        ctx.setLineDash([5, 5]);
+                        ctx.beginPath();
+                        ctx.moveTo(xAxis.left, yCapacity);
+                        ctx.lineTo(xAxis.right, yCapacity);
+                        ctx.stroke();
+                        ctx.fillStyle = NAVY;
+                        ctx.font = '500 12px Montserrat';
+                        ctx.fillText('Capacity: ' + capacity.toLocaleString(), xAxis.right - 130, yCapacity - 8);
+                        ctx.restore();
+                    }
+                }]
+            });
+            myChart.trendlinesVisible = false;
+        }
+
+        function updateChart() {
+            capacity = parseInt(document.getElementById('capacityInput').value);
+            if (capacity && capacity > 0) {
+                createChart(capacity);
+                updateStats(capacity);
+                updateSummary(capacity);
+            }
+        }
+
+        window.onload = function() { updateChart(); };
+    </script>
+</body>
+</html>
