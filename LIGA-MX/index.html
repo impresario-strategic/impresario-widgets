@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Liga MX Overview | Impresario Strategic</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.27.0/plotly.min.js"></script>
+    <style>
+        * { font-family: 'Montserrat', sans-serif; }
+        body { margin: 0; padding: 20px; background-color: #f8f8f8; min-height: 100vh; box-sizing: border-box; }
+        .container { max-width: 1300px; margin: 0 auto; }
+        .chart-wrapper { background-color: #ffffff; border-radius: 8px; padding: 24px; position: relative; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+        .branding { position: absolute; bottom: 70px; right: 40px; display: flex; align-items: center; gap: 8px; opacity: 0.5; }
+        .branding-text { color: #07385E; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; }
+        .branding-icon { width: 24px; height: 24px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="chart-wrapper">
+            <div id="chart"></div>
+            <div class="branding">
+                <svg class="branding-icon" viewBox="0 0 25400 25400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="#07385E" fill-rule="nonzero" d="M14589.56 9160.1c967.54,373.75 1796.66,1026.13 2388.22,1858.26 609.4,857.37 968.01,1904.97 968.01,3035.47 0,1130.38 -358.61,2178.21 -968.13,3035.57 -625.38,879.72 -1516.27,1558.47 -2555.39,1919.56l-330.52 114.87 0 -9611.37c-194.16,-59.39 -394.28,-106.77 -599.29,-141.23 -255.14,-42.92 -520.04,-65.37 -792.46,-65.37 -272.42,0 -537.32,22.45 -792.46,65.37 -205.01,34.46 -405.13,81.84 -599.29,141.23l0 9611.37 -330.5 -114.87c-1039.14,-361.09 -1930.01,-1039.84 -2555.41,-1919.56 -609.52,-857.36 -968.13,-1905.19 -968.13,-3035.57 0,-1130.5 358.61,-2178.1 968.01,-3035.47 591.69,-832.24 1420.7,-1484.49 2388.22,-1858.24l0 -2883.97 3779.12 0 0 248.91 0 2635.04zm-497.81 -164.17l0 -11.99 0 -2209.98 -2783.5 0 0 2209.98 0 11.99c169.66,-46.8 342.39,-85.13 517.69,-114.53 286.42,-48.19 578.82,-73.36 874.06,-73.36 295.24,0 587.64,25.17 874.06,73.36 175.32,29.4 348.03,67.73 517.69,114.53zm2481.58 2310.26c-499.13,-702.29 -1184.58,-1263.01 -1983.77,-1610.1l0 8715.46c799.07,-346.97 1484.52,-907.68 1983.64,-1609.97 550.73,-774.71 874.78,-1723.07 874.78,-2747.75 0,-1024.8 -324.05,-1973.05 -874.65,-2747.64zm-7746.53 5495.39c499.12,702.29 1184.59,1263 1983.64,1609.97l0 -8715.46c-799.17,347.09 -1484.64,907.81 -1983.75,1610.1 -550.62,774.59 -874.64,1722.84 -874.64,2747.64 0,1024.68 324.02,1973.04 874.75,2747.75z"/>
+                </svg>
+                <span class="branding-text">Impresario Strategic</span>
+            </div>
+        </div>
+    </div>
+    <script>
+        const NAVY = '#07385E', GOLD = '#D5C393', WHITE = '#FFFFFF', NAVY_LIGHT = 'rgba(7, 56, 94, 0.08)', NAVY_MED = 'rgba(7, 56, 94, 0.25)';
+        const clubs = [
+            { name: "Tigres UANL", capacity: 41886, sellThrough: 97.1, textPos: 'top left' },
+            { name: "CF Monterrey", capacity: 53500, sellThrough: 87.0, textPos: 'top left' },
+            { name: "Toluca", capacity: 31000, sellThrough: 84.2, textPos: 'top right' },
+            { name: "Tijuana", capacity: 29333, sellThrough: 73.6, textPos: 'top right' },
+            { name: "Guadalajara", capacity: 49580, sellThrough: 71.6, textPos: 'top left' },
+            { name: "León", capacity: 33943, sellThrough: 67.3, textPos: 'top right' },
+            { name: "Necaxa", capacity: 23851, sellThrough: 66.5, textPos: 'top left' },
+            { name: "San Luis", capacity: 27029, sellThrough: 57.2, textPos: 'top right' },
+            { name: "Querétaro", capacity: 34107, sellThrough: 43.4, textPos: 'middle right' },
+            { name: "Mazatlán", capacity: 25000, sellThrough: 42.4, textPos: 'top left' },
+            { name: "Pachuca", capacity: 30000, sellThrough: 41.6, textPos: 'top right' },
+            { name: "Santos Laguna", capacity: 29237, sellThrough: 39.5, highlight: true, textPos: 'bottom right' },
+            { name: "Juárez", capacity: 22300, sellThrough: 39.3, textPos: 'bottom left' },
+            { name: "Pumas", capacity: 62700, sellThrough: 37.0, textPos: 'top left' },
+            { name: "Cruz Azul", capacity: 62700, sellThrough: 36.2, textPos: 'middle right' },
+            { name: "Atlas", capacity: 56713, sellThrough: 33.2, highlight: true, textPos: 'top left' },
+            { name: "Puebla", capacity: 48000, sellThrough: 31.9, textPos: 'middle right' },
+            { name: "América", capacity: 81070, sellThrough: 28.3, textPos: 'middle left' }
+        ];
+        
+        const mainTrace = {
+            x: clubs.map(c => c.capacity), 
+            y: clubs.map(c => c.sellThrough), 
+            text: clubs.map(c => c.name),
+            mode: 'markers+text', 
+            type: 'scatter', 
+            showlegend: false,
+            marker: { 
+                size: clubs.map(c => c.highlight ? 20 : 12), 
+                color: clubs.map(c => c.highlight ? GOLD : NAVY), 
+                line: { 
+                    color: clubs.map(c => c.highlight ? NAVY : WHITE), 
+                    width: clubs.map(c => c.highlight ? 2.5 : 1.5) 
+                } 
+            },
+            textposition: clubs.map(c => c.textPos || 'top right'), 
+            textfont: { family: 'Montserrat', size: 11, color: 'rgba(26, 26, 26, 0.7)' },
+            hovertemplate: '<b>%{text}</b><br>Capacity: %{x:,}<br>Sell-Through: %{y:.1f}%<extra></extra>'
+        };
+        
+        const capacityLine = { 
+            x: [0, 85000], 
+            y: [100, 100], 
+            mode: 'lines', 
+            type: 'scatter', 
+            showlegend: false, 
+            line: { color: GOLD, width: 1.5, dash: 'dot' }, 
+            hoverinfo: 'skip' 
+        };
+        
+        const segments = [
+            { name: 'Very Large, Low Sell-Through', x: [46000, 85000, 85000, 46000, 46000], y: [26, 26, 39, 39, 26] },
+            { name: 'Mid-sized, Room to Grow', x: [21000, 35000, 35000, 21000, 21000], y: [38, 38, 45, 45, 38] },
+            { name: '>50% Sold', x: [22000, 55000, 55000, 22000, 22000], y: [55, 55, 98, 98, 55] }
+        ];
+        
+        const segmentAnnotations = [
+            { x: 65000, y: 24, text: '<b>Very Large, Low Sell-Through</b>', showarrow: false, font: { family: 'Montserrat', size: 12, color: NAVY }, bgcolor: 'rgba(255,255,255,0.85)', borderpad: 4 },
+            { x: 28000, y: 33, text: '<b>Mid-sized, Room to Grow</b>', showarrow: false, font: { family: 'Montserrat', size: 12, color: NAVY }, bgcolor: 'rgba(255,255,255,0.85)', borderpad: 4 },
+            { x: 23000, y: 96, text: '<b>>50% Sold</b>', showarrow: false, font: { family: 'Montserrat', size: 12, color: NAVY }, bgcolor: 'rgba(255,255,255,0.85)', borderpad: 4, xanchor: 'left' }
+        ];
+        
+        const segmentTraces = [];
+        segments.forEach(seg => {
+            segmentTraces.push({ 
+                x: seg.x, 
+                y: seg.y, 
+                mode: 'lines', 
+                type: 'scatter', 
+                showlegend: false, 
+                visible: true, 
+                line: { color: NAVY_MED, width: 1.5, dash: 'dash' }, 
+                fill: 'toself', 
+                fillcolor: NAVY_LIGHT, 
+                hoverinfo: 'skip' 
+            });
+        });
+        
+        const data = [mainTrace, capacityLine, ...segmentTraces];
+        
+        const layout = {
+            title: { 
+                text: 'Liga MX: Stadium Capacity vs. Sell-Through (2024-25)', 
+                font: { family: 'Montserrat', size: 22, color: NAVY }, 
+                x: 0.5, 
+                xanchor: 'center', 
+                y: 0.95 
+            },
+            xaxis: { 
+                title: { text: 'Stadium Capacity', font: { family: 'Montserrat', size: 14, color: NAVY }, standoff: 15 }, 
+                range: [0, 85000], 
+                showgrid: true, 
+                gridcolor: 'rgba(7, 56, 94, 0.08)', 
+                zeroline: false, 
+                tickfont: { family: 'Montserrat', size: 12, color: 'rgba(26, 26, 26, 0.6)' }, 
+                tickformat: ',d', 
+                linecolor: 'rgba(7, 56, 94, 0.2)' 
+            },
+            yaxis: { 
+                title: { text: 'Sell-Through (%)', font: { family: 'Montserrat', size: 14, color: NAVY }, standoff: 10 }, 
+                range: [0, 105], 
+                showgrid: true, 
+                gridcolor: 'rgba(7, 56, 94, 0.08)', 
+                zeroline: false, 
+                tickfont: { family: 'Montserrat', size: 12, color: 'rgba(26, 26, 26, 0.6)' }, 
+                ticksuffix: '%', 
+                linecolor: 'rgba(7, 56, 94, 0.2)' 
+            },
+            plot_bgcolor: WHITE, 
+            paper_bgcolor: WHITE, 
+            width: 1200, 
+            height: 750, 
+            margin: { l: 70, r: 40, t: 60, b: 80 }, 
+            hovermode: 'closest', 
+            showlegend: false,
+            annotations: segmentAnnotations,
+            updatemenus: [{ 
+                type: 'buttons', 
+                direction: 'right', 
+                x: 0.5, 
+                xanchor: 'center', 
+                y: -0.12, 
+                yanchor: 'top', 
+                pad: { r: 10, t: 10 }, 
+                showactive: true, 
+                bgcolor: WHITE, 
+                bordercolor: NAVY, 
+                borderwidth: 1, 
+                font: { family: 'Montserrat', size: 12, color: NAVY },
+                buttons: [
+                    { label: '      Show Segments      ', method: 'update', args: [{ visible: [true, true, true, true, true] }, { annotations: segmentAnnotations }] },
+                    { label: '      Hide Segments      ', method: 'update', args: [{ visible: [true, true, false, false, false] }, { annotations: [] }] }
+                ]
+            }]
+        };
+        
+        Plotly.newPlot('chart', data, layout, { 
+            responsive: true, 
+            displayModeBar: true, 
+            modeBarButtonsToRemove: ['pan2d', 'select2d', 'lasso2d', 'autoScale2d'], 
+            displaylogo: false 
+        });
+    </script>
+</body>
+</html>
