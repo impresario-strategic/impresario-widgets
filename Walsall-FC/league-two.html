@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>League Two 2025-26 — Capacity vs Sell-Through | Impresario Strategic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<style>
+  :root { --navy:#07385E; --gold:#D5C393; --mid-navy:#4A7396; --ink:#1d2b36; --wash:#F5F7F9; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Montserrat',sans-serif; background:var(--wash); color:var(--ink); padding:32px 16px 48px; }
+  .container { max-width:1080px; margin:0 auto; background:#fff; border-radius:12px; box-shadow:0 4px 24px rgba(7,56,94,.10); padding:40px 44px 28px; }
+  .header { border-bottom:3px solid var(--gold); padding-bottom:18px; margin-bottom:22px; }
+  .header h1 { color:var(--navy); font-size:26px; font-weight:800; letter-spacing:.3px; }
+  .header .subtitle { color:var(--mid-navy); font-size:14px; font-weight:500; margin-top:6px; }
+  .chart-wrap { position:relative; height:560px; margin-bottom:24px; }
+  .branding { display:flex; justify-content:flex-end; align-items:center; gap:10px; border-top:1px solid rgba(7,56,94,.12); padding-top:16px; }
+  .branding .mark { width:28px; height:28px; border-radius:6px; display:block; }
+  .branding .wordmark { font-size:12px; font-weight:700; letter-spacing:2.5px; color:var(--navy); }
+  .branding .wordmark span { color:var(--gold); }
+  @media (max-width:760px){ .container{padding:24px 18px;} .chart-wrap{height:440px;} }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>English League Two 2025-26 — Stadium Capacity vs Sell-Through</h1>
+    <div class="subtitle">All 24 clubs &nbsp;&bull;&nbsp; Average attendance as a share of capacity &nbsp;&bull;&nbsp; Walsall FC highlighted</div>
+  </div>
+  <div class="chart-wrap"><canvas id="scatter"></canvas></div>
+    <div class="branding">
+    <img class="mark" src="data:image/jpeg;base64,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" alt="Impresario Strategic">
+    <div class="wordmark">IMPRESARIO <span>STRATEGIC</span></div>
+  </div>
+</div>
+
+<script>
+const clubs = [
+  {club:'Notts County', code:'NOT', cap:20229, avg:10423},
+  {club:'MK Dons', code:'MKD', cap:30500, avg:8563},
+  {club:'Swindon Town', code:'SWI', cap:15728, avg:8434},
+  {club:'Chesterfield', code:'CHE', cap:10504, avg:8143},
+  {club:'Bristol Rovers', code:'BRR', cap:12000, avg:8051},
+  {club:'Oldham Athletic', code:'OLD', cap:13513, avg:7538},
+  {club:'Tranmere Rovers', code:'TRA', cap:16789, avg:6871},
+  {club:'Cambridge United', code:'CAM', cap:8127, avg:6600},
+  {club:'Grimsby Town', code:'GRI', cap:9546, avg:6537, la:'top'},
+  {club:'Walsall', code:'WAL', cap:11300, avg:6356, la:'top'},
+  {club:'Gillingham', code:'GIL', cap:11582, avg:6083, la:'bottom'},
+  {club:'Crewe Alexandra', code:'CRE', cap:10153, avg:5693, la:'right'},
+  {club:'Shrewsbury Town', code:'SHR', cap:9875, avg:5659, la:'left'},
+  {club:'Colchester United', code:'COL', cap:10105, avg:5104, la:'bottom'},
+  {club:'Newport County', code:'NEW', cap:7850, avg:4317},
+  {club:'Cheltenham Town', code:'CHL', cap:7066, avg:3988, la:'bottom'},
+  {club:'Bromley', code:'BRO', cap:6100, avg:3953, la:'top'},
+  {club:'Crawley Town', code:'CRA', cap:6134, avg:3631, la:'right'},
+  {club:'Harrogate Town', code:'HAR', cap:5000, avg:3054, la:'top'},
+  {club:'Salford City', code:'SAL', cap:5108, avg:3045, la:'left'},
+  {club:'Barnet', code:'BNT', cap:5176, avg:2848, la:'left'},
+  {club:'Fleetwood Town', code:'FLE', cap:5327, avg:2818, la:'right'},
+  {club:'Barrow', code:'BRW', cap:6500, avg:2809},
+  {club:'Accrington Stanley', code:'ACC', cap:5450, avg:2259}
+];
+clubs.forEach(c => c.st = +(c.avg / c.cap * 100).toFixed(1));
+
+const others = clubs.filter(c => c.club !== 'Walsall').map(c => ({x:c.cap, y:c.st, club:c.club, code:c.code, avg:c.avg, la:c.la||'top'}));
+const walsall = clubs.filter(c => c.club === 'Walsall').map(c => ({x:c.cap, y:c.st, club:c.club, code:c.code, avg:c.avg, la:c.la||'top'}));
+
+new Chart(document.getElementById('scatter').getContext('2d'), {
+  type: 'scatter',
+  data: {
+    datasets: [
+      { label:'League Two clubs', data:others, backgroundColor:'rgba(7,56,94,0.78)', pointRadius:6, pointHoverRadius:8 },
+      { label:'Walsall FC', data:walsall, backgroundColor:'#D5C393', borderColor:'#07385E', borderWidth:2.5, pointRadius:9, pointHoverRadius:11 }
+    ]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    plugins: {
+      legend: {
+        labels: { font:{family:'Montserrat',size:12,weight:'600'}, color:'#07385E', usePointStyle:true, pointStyle:'circle' }
+      },
+      tooltip: {
+        backgroundColor:'#07385E', titleColor:'#D5C393', bodyColor:'#fff',
+        titleFont:{family:'Montserrat',weight:'700',size:13}, bodyFont:{family:'Montserrat',size:12},
+        padding:12, displayColors:false,
+        callbacks: {
+          title: items => items[0].raw.club,
+          label: item => {
+            const d = item.raw;
+            const mis = (d.y/100)*(d.y/100)*100 + d.avg/1000;
+            return [
+              'Capacity: ' + d.x.toLocaleString(),
+              'Avg attendance: ' + d.avg.toLocaleString(),
+              'Sell-through: ' + d.y.toFixed(1) + '%',
+              'MIS: ' + mis.toFixed(1)
+            ];
+          }
+        }
+      },
+      datalabels: {
+        align: ctx => ctx.dataset.data[ctx.dataIndex].la,
+        anchor:'center', offset:7, clamp:true,
+        font: ctx => ({family:'Montserrat', size:10, weight: ctx.dataset.label === 'Walsall FC' ? '800' : '600'}),
+        color: ctx => ctx.dataset.label === 'Walsall FC' ? '#07385E' : '#4A7396',
+        formatter: v => v.code
+      }
+    },
+    scales: {
+      x: {
+        min:0, max:32000,
+        title:{display:true, text:'Stadium capacity', font:{family:'Montserrat',size:12,weight:'600'}, color:'#07385E'},
+        ticks:{font:{family:'Montserrat',size:11}, color:'#4A7396', callback:v=>v.toLocaleString()},
+        grid:{color:'rgba(7,56,94,0.06)'}
+      },
+      y: {
+        min:20, max:90,
+        title:{display:true, text:'Sell-through (%)', font:{family:'Montserrat',size:12,weight:'600'}, color:'#07385E'},
+        ticks:{font:{family:'Montserrat',size:11}, color:'#4A7396', callback:v=>v+'%'},
+        grid:{color:'rgba(7,56,94,0.06)'}
+      }
+    }
+  },
+  plugins:[ChartDataLabels]
+});
+</script>
+</body>
+</html>
