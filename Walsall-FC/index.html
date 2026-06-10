@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Walsall FC — Three-Season Home Attendance | Impresario Strategic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --navy: #07385E;
+    --gold: #D5C393;
+    --light-navy: #A9C3D6;
+    --mid-navy: #4A7396;
+    --ink: #1d2b36;
+    --paper: #FFFFFF;
+    --wash: #F5F7F9;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--wash);
+    color: var(--ink);
+    padding: 32px 16px 48px;
+  }
+  .container {
+    max-width: 1080px;
+    margin: 0 auto;
+    background: var(--paper);
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(7, 56, 94, 0.10);
+    padding: 40px 44px 28px;
+  }
+  .header { border-bottom: 3px solid var(--gold); padding-bottom: 18px; margin-bottom: 24px; }
+  .header h1 {
+    color: var(--navy);
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+  }
+  .header .subtitle {
+    color: var(--mid-navy);
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 6px;
+  }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .controls .spacer { flex: 1; }
+  .toggle-btn {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 16px;
+    border: 1.5px solid var(--navy);
+    border-radius: 20px;
+    background: var(--paper);
+    color: var(--navy);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .toggle-btn.active { background: var(--navy); color: var(--gold); }
+  .toggle-btn:hover { box-shadow: 0 2px 8px rgba(7, 56, 94, 0.18); }
+  .capacity-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--navy);
+  }
+  .capacity-control input {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--navy);
+    width: 90px;
+    padding: 6px 8px;
+    border: 1.5px solid var(--gold);
+    border-radius: 6px;
+    text-align: right;
+  }
+  .chart-wrap { position: relative; height: 480px; margin-bottom: 28px; }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--wash);
+    border-radius: 10px;
+    border-top: 4px solid;
+    padding: 18px 20px 16px;
+  }
+  .stat-card h3 {
+    font-size: 15px;
+    font-weight: 800;
+    margin-bottom: 12px;
+  }
+  .stat-card .row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12.5px;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(7, 56, 94, 0.08);
+  }
+  .stat-card .row:last-child { border-bottom: none; }
+  .stat-card .label { color: var(--mid-navy); font-weight: 500; }
+  .stat-card .value { font-weight: 700; color: var(--ink); }
+  .branding {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    border-top: 1px solid rgba(7, 56, 94, 0.12);
+    padding-top: 16px;
+  }
+  .branding .mark {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: block;
+  }
+  .branding .wordmark {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    color: var(--navy);
+  }
+  .branding .wordmark span { color: var(--gold); }
+  @media (max-width: 760px) {
+    .container { padding: 24px 18px; }
+    .stats-grid { grid-template-columns: 1fr; }
+    .chart-wrap { height: 380px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Walsall FC — Home Attendance, Three Seasons</h1>
+    <div class="subtitle">English League Two &nbsp;•&nbsp; Bescot Stadium &nbsp;•&nbsp; 2023-24 through 2025-26</div>
+  </div>
+
+  <div class="controls">
+    <button class="toggle-btn" id="trend-0" onclick="toggleTrend(0)">2023-24 Trend</button>
+    <button class="toggle-btn" id="trend-1" onclick="toggleTrend(1)">2024-25 Trend</button>
+    <button class="toggle-btn" id="trend-2" onclick="toggleTrend(2)">2025-26 Trend</button>
+    <div class="spacer"></div>
+    <div class="capacity-control">
+      <label for="capInput">Stadium capacity</label>
+      <input type="number" id="capInput" value="11300" step="100" min="1000">
+    </div>
+  </div>
+
+  <div class="chart-wrap"><canvas id="attChart"></canvas></div>
+
+  <div class="stats-grid" id="statsGrid"></div>
+
+  <div class="branding">
+    <img class="mark" src="data:image/jpeg;base64,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" alt="Impresario Strategic">
+    <div class="wordmark">IMPRESARIO <span>STRATEGIC</span></div>
+  </div>
+</div>
+
+<script>
+// Match data, ordered by actual date played (rearranged fixtures re-sequenced)
+const seasons = [
+  {
+    name: '2023-24',
+    color: '#A9C3D6',
+    matches: [
+      {date:'12 Aug 2023', day:'Sat', opp:'Stockport County', pos:'19th', att:6008, res:'2-1'},
+      {date:'26 Aug 2023', day:'Sat', opp:'Grimsby Town', pos:'12th', att:5314, res:'1-1'},
+      {date:'2 Sep 2023', day:'Sat', opp:'Colchester United', pos:'14th', att:5058, res:'1-0'},
+      {date:'23 Sep 2023', day:'Sat', opp:'AFC Wimbledon', pos:'11th', att:5318, res:'1-3'},
+      {date:'3 Oct 2023', day:'Tue', opp:'Milton Keynes Dons', pos:'11th', att:4515, res:'0-0'},
+      {date:'14 Oct 2023', day:'Sat', opp:'Gillingham', pos:'3rd', att:5632, res:'4-1'},
+      {date:'24 Oct 2023', day:'Tue', opp:'Crawley Town', pos:'13th', att:4108, res:'1-1'},
+      {date:'11 Nov 2023', day:'Sat', opp:'Harrogate Town', pos:'19th', att:4654, res:'0-1'},
+      {date:'25 Nov 2023', day:'Sat', opp:'Forest Green Rovers', pos:'23rd', att:6317, res:'0-0'},
+      {date:'16 Dec 2023', day:'Sat', opp:'Tranmere Rovers', pos:'21st', att:5190, res:'1-0'},
+      {date:'26 Dec 2023', day:'Tue', opp:'Crewe Alexandra', pos:'5th', att:5672, res:'2-0'},
+      {date:'29 Dec 2023', day:'Fri', opp:'Wrexham', pos:'4th', att:8709, res:'3-1'},
+      {date:'27 Jan 2024', day:'Sat', opp:'Sutton United', pos:'23rd', att:5094, res:'1-1'},
+      {date:'10 Feb 2024', day:'Sat', opp:'Newport County', pos:'13th', att:5454, res:'0-3'},
+      {date:'17 Feb 2024', day:'Sat', opp:'Mansfield Town', pos:'2nd', att:6625, res:'2-1'},
+      {date:'20 Feb 2024', day:'Tue', opp:'Morecambe', pos:'17th', att:4543, res:'3-0'},
+      {date:'27 Feb 2024', day:'Tue', opp:'Accrington Stanley', pos:'10th', att:5013, res:'2-1'},
+      {date:'2 Mar 2024', day:'Sat', opp:'Doncaster Rovers', pos:'18th', att:7118, res:'3-1'},
+      {date:'12 Mar 2024', day:'Tue', opp:'Barrow', pos:'6th', att:4737, res:'1-1'},
+      {date:'1 Apr 2024', day:'Mon', opp:'Salford City', pos:'20th', att:6189, res:'2-1'},
+      {date:'13 Apr 2024', day:'Sat', opp:'Notts County', pos:'15th', att:6576, res:'1-3'},
+      {date:'16 Apr 2024', day:'Tue', opp:'Swindon Town', pos:'19th', att:4709, res:'2-1'},
+      {date:'20 Apr 2024', day:'Sat', opp:'Bradford City', pos:'10th', att:6656, res:'2-3'}
+    ]
+  },
+  {
+    name: '2024-25',
+    color: '#4A7396',
+    matches: [
+      {date:'10 Aug 2024', day:'Sat', opp:'Morecambe', pos:'24th', att:5226, res:'1-0'},
+      {date:'31 Aug 2024', day:'Sat', opp:'Cheltenham Town', pos:'16th', att:5760, res:'2-1'},
+      {date:'14 Sep 2024', day:'Sat', opp:'Bradford City', pos:'6th', att:5967, res:'2-1'},
+      {date:'28 Sep 2024', day:'Sat', opp:'Colchester United', pos:'12th', att:5140, res:'4-0'},
+      {date:'1 Oct 2024', day:'Tue', opp:'Fleetwood Town', pos:'7th', att:4237, res:'2-6'},
+      {date:'22 Oct 2024', day:'Tue', opp:'Carlisle United', pos:'23rd', att:4939, res:'3-1'},
+      {date:'9 Nov 2024', day:'Sat', opp:'Crewe Alexandra', pos:'6th', att:8105, res:'1-1'},
+      {date:'26 Nov 2024', day:'Tue', opp:'Bromley', pos:'19th', att:4424, res:'2-2'},
+      {date:'3 Dec 2024', day:'Tue', opp:'Notts County', pos:'6th', att:5720, res:'3-2'},
+      {date:'14 Dec 2024', day:'Sat', opp:'Barrow', pos:'13th', att:5109, res:'1-0'},
+      {date:'26 Dec 2024', day:'Thu', opp:'Doncaster Rovers', pos:'4th', att:7320, res:'2-0'},
+      {date:'29 Dec 2024', day:'Sun', opp:'Newport County', pos:'17th', att:6707, res:'2-0'},
+      {date:'11 Jan 2025', day:'Sat', opp:'Tranmere Rovers', pos:'20th', att:5614, res:'5-1'},
+      {date:'18 Jan 2025', day:'Sat', opp:'Milton Keynes Dons', pos:'12th', att:6144, res:'4-2'},
+      {date:'1 Feb 2025', day:'Sat', opp:'Salford City', pos:'8th', att:5970, res:'2-2'},
+      {date:'11 Feb 2025', day:'Tue', opp:'Gillingham', pos:'9th', att:6229, res:'1-1'},
+      {date:'15 Feb 2025', day:'Sat', opp:'Chesterfield', pos:'9th', att:6830, res:'3-1'},
+      {date:'1 Mar 2025', day:'Sat', opp:'Swindon Town', pos:'15th', att:6910, res:'0-1'},
+      {date:'8 Mar 2025', day:'Sat', opp:'Grimsby Town', pos:'8th', att:6255, res:'1-3'},
+      {date:'29 Mar 2025', day:'Sat', opp:'AFC Wimbledon', pos:'3rd', att:9203, res:'1-1'},
+      {date:'5 Apr 2025', day:'Sat', opp:'Port Vale', pos:'3rd', att:8446, res:'2-3'},
+      {date:'18 Apr 2025', day:'Fri', opp:'Harrogate Town', pos:'20th', att:7408, res:'2-2'},
+      {date:'26 Apr 2025', day:'Sat', opp:'Accrington Stanley', pos:'21st', att:8131, res:'0-1'}
+    ]
+  },
+  {
+    name: '2025-26',
+    color: '#07385E',
+    matches: [
+      {date:'2 Aug 2025', day:'Sat', opp:'Swindon Town', pos:'9th', att:8240, res:'2-1'},
+      {date:'19 Aug 2025', day:'Tue', opp:'Grimsby Town', pos:'4th', att:5619, res:'0-1'},
+      {date:'23 Aug 2025', day:'Sat', opp:'Salford City', pos:'4th', att:5490, res:'1-0'},
+      {date:'6 Sep 2025', day:'Sat', opp:'Chesterfield', pos:'2nd', att:6695, res:'1-0'},
+      {date:'20 Sep 2025', day:'Sat', opp:'Tranmere Rovers', pos:'14th', att:6010, res:'4-2'},
+      {date:'4 Oct 2025', day:'Sat', opp:'Bristol Rovers', pos:'7th', att:8003, res:'2-1'},
+      {date:'18 Oct 2025', day:'Sat', opp:'Barrow', pos:'18th', att:7763, res:'1-2'},
+      {date:'15 Nov 2025', day:'Sat', opp:'Colchester United', pos:'16th', att:6251, res:'0-2'},
+      {date:'29 Nov 2025', day:'Sat', opp:'Bromley', pos:'3rd', att:7228, res:'3-1'},
+      {date:'13 Dec 2025', day:'Sat', opp:'Shrewsbury Town', pos:'20th', att:7342, res:'1-1'},
+      {date:'26 Dec 2025', day:'Fri', opp:'Crewe Alexandra', pos:'10th', att:7609, res:'1-0'},
+      {date:'29 Dec 2025', day:'Mon', opp:'Oldham Athletic', pos:'15th', att:6704, res:'1-2'},
+      {date:'24 Jan 2026', day:'Sat', opp:'Accrington Stanley', pos:'16th', att:5682, res:'0-0'},
+      {date:'27 Jan 2026', day:'Tue', opp:'Crawley Town', pos:'23rd', att:4899, res:'0-0'},
+      {date:'7 Feb 2026', day:'Sat', opp:'Barnet', pos:'10th', att:5179, res:'1-3'},
+      {date:'23 Feb 2026', day:'Mon', opp:'Milton Keynes Dons', pos:'2nd', att:5131, res:'0-2'},
+      {date:'3 Mar 2026', day:'Tue', opp:'Fleetwood Town', pos:'13th', att:4795, res:'0-1'},
+      {date:'7 Mar 2026', day:'Sat', opp:'Notts County', pos:'5th', att:7316, res:'1-2'},
+      {date:'17 Mar 2026', day:'Tue', opp:'Cambridge United', pos:'3rd', att:5311, res:'0-0'},
+      {date:'21 Mar 2026', day:'Sat', opp:'Newport County', pos:'23rd', att:6652, res:'2-1'},
+      {date:'3 Apr 2026', day:'Fri', opp:'Gillingham', pos:'17th', att:5994, res:'2-2'},
+      {date:'11 Apr 2026', day:'Sat', opp:'Cheltenham Town', pos:'18th', att:6103, res:'0-4'},
+      {date:'25 Apr 2026', day:'Sat', opp:'Harrogate Town', pos:'24th', att:6181, res:'0-2'}
+    ]
+  }
+];
+
+let capacity = 11300;
+const trendVisible = [false, false, false];
+
+function linearTrend(values) {
+  const n = values.length;
+  let sx = 0, sy = 0, sxy = 0, sxx = 0;
+  values.forEach((y, i) => { sx += i; sy += y; sxy += i * y; sxx += i * i; });
+  const slope = (n * sxy - sx * sy) / (n * sxx - sx * sx);
+  const intercept = (sy - slope * sx) / n;
+  return values.map((_, i) => Math.round(intercept + slope * i));
+}
+
+const maxLen = Math.max(...seasons.map(s => s.matches.length));
+const labels = Array.from({length: maxLen}, (_, i) => 'Match ' + (i + 1));
+
+function buildDatasets() {
+  const ds = [];
+  seasons.forEach((s, idx) => {
+    ds.push({
+      label: s.name,
+      data: s.matches.map(m => m.att),
+      borderColor: s.color,
+      backgroundColor: s.color,
+      borderWidth: 2.5,
+      pointRadius: 4,
+      pointHoverRadius: 6,
+      tension: 0.25,
+      seasonIndex: idx,
+      isTrend: false
+    });
+  });
+  seasons.forEach((s, idx) => {
+    ds.push({
+      label: s.name + ' trend',
+      data: linearTrend(s.matches.map(m => m.att)),
+      borderColor: s.color,
+      borderWidth: 1.5,
+      borderDash: [6, 5],
+      pointRadius: 0,
+      pointHoverRadius: 0,
+      hidden: !trendVisible[idx],
+      seasonIndex: idx,
+      isTrend: true
+    });
+  });
+  ds.push({
+    label: 'Capacity',
+    data: Array(maxLen).fill(capacity),
+    borderColor: '#D5C393',
+    borderWidth: 2,
+    borderDash: [10, 6],
+    pointRadius: 0,
+    pointHoverRadius: 0,
+    isCapacity: true
+  });
+  return ds;
+}
+
+const ctx = document.getElementById('attChart').getContext('2d');
+const chart = new Chart(ctx, {
+  type: 'line',
+  data: { labels, datasets: buildDatasets() },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'nearest', intersect: true },
+    plugins: {
+      legend: {
+        labels: {
+          font: { family: 'Montserrat', size: 12, weight: '600' },
+          color: '#07385E',
+          usePointStyle: true,
+          pointStyleWidth: 34,
+          filter: item => !item.text.includes('trend'),
+          generateLabels: chart => {
+            const labels = Chart.defaults.plugins.legend.labels.generateLabels(chart);
+            labels.forEach(l => {
+              const ds = chart.data.datasets[l.datasetIndex];
+              l.pointStyle = 'line';
+              l.lineWidth = ds.borderWidth;
+              l.lineDash = ds.borderDash || [];
+            });
+            return labels;
+          }
+        }
+      },
+      tooltip: {
+        backgroundColor: '#07385E',
+        titleColor: '#D5C393',
+        bodyColor: '#FFFFFF',
+        titleFont: { family: 'Montserrat', weight: '700', size: 13 },
+        bodyFont: { family: 'Montserrat', size: 12 },
+        padding: 12,
+        displayColors: false,
+        filter: item => !item.dataset.isTrend && !item.dataset.isCapacity,
+        callbacks: {
+          title: items => {
+            const d = items[0].dataset;
+            if (d.isTrend || d.isCapacity) return '';
+            const m = seasons[d.seasonIndex].matches[items[0].dataIndex];
+            return 'vs ' + m.opp + ' (' + m.pos + ')';
+          },
+          label: item => {
+            const d = item.dataset;
+            if (d.isTrend || d.isCapacity) return '';
+            const m = seasons[d.seasonIndex].matches[item.dataIndex];
+            const pct = ((m.att / capacity) * 100).toFixed(1);
+            return [
+              m.day + ' ' + m.date + '  •  ' + d.label.replace(' trend',''),
+              'Result: ' + m.res,
+              'Attendance: ' + m.att.toLocaleString(),
+              'Capacity: ' + pct + '%'
+            ];
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        min: 0,
+        suggestedMax: 12000,
+        ticks: {
+          font: { family: 'Montserrat', size: 11 },
+          color: '#4A7396',
+          callback: v => v.toLocaleString()
+        },
+        grid: { color: 'rgba(7, 56, 94, 0.07)' },
+        title: {
+          display: true,
+          text: 'Attendance',
+          font: { family: 'Montserrat', size: 12, weight: '600' },
+          color: '#07385E'
+        }
+      },
+      x: {
+        ticks: { font: { family: 'Montserrat', size: 11 }, color: '#4A7396' },
+        grid: { display: false },
+        title: {
+          display: true,
+          text: 'Home match (chronological)',
+          font: { family: 'Montserrat', size: 12, weight: '600' },
+          color: '#07385E'
+        }
+      }
+    }
+  }
+});
+
+function toggleTrend(idx) {
+  trendVisible[idx] = !trendVisible[idx];
+  document.getElementById('trend-' + idx).classList.toggle('active', trendVisible[idx]);
+  chart.data.datasets.forEach(d => {
+    if (d.isTrend && d.seasonIndex === idx) d.hidden = !trendVisible[idx];
+  });
+  chart.update();
+}
+
+document.getElementById('capInput').addEventListener('change', e => {
+  const v = parseInt(e.target.value, 10);
+  if (!isNaN(v) && v > 0) {
+    capacity = v;
+    chart.data.datasets.forEach(d => {
+      if (d.isCapacity) d.data = Array(maxLen).fill(capacity);
+    });
+    chart.update();
+    buildStats();
+  }
+});
+
+function buildStats() {
+  const grid = document.getElementById('statsGrid');
+  grid.innerHTML = '';
+  seasons.forEach(s => {
+    const atts = s.matches.map(m => m.att);
+    const total = atts.reduce((a, b) => a + b, 0);
+    const avg = Math.round(total / atts.length);
+    const hi = Math.max(...atts);
+    const lo = Math.min(...atts);
+    const hiM = s.matches.find(m => m.att === hi);
+    const loM = s.matches.find(m => m.att === lo);
+    const card = document.createElement('div');
+    card.className = 'stat-card';
+    card.style.borderTopColor = s.color;
+    card.innerHTML =
+      '<h3 style="color:' + (s.color === '#A9C3D6' ? '#4A7396' : s.color) + '">' + s.name + '</h3>' +
+      '<div class="row"><span class="label">Average</span><span class="value">' + avg.toLocaleString() + ' (' + ((avg/capacity)*100).toFixed(1) + '%)</span></div>' +
+      '<div class="row"><span class="label">Total</span><span class="value">' + total.toLocaleString() + '</span></div>' +
+      '<div class="row"><span class="label">Highest</span><span class="value">' + hi.toLocaleString() + ' — ' + hiM.opp + '</span></div>' +
+      '<div class="row"><span class="label">Lowest</span><span class="value">' + lo.toLocaleString() + ' — ' + loM.opp + '</span></div>' +
+      '<div class="row"><span class="label">Matches</span><span class="value">' + atts.length + '</span></div>';
+    grid.appendChild(card);
+  });
+}
+buildStats();
+</script>
+</body>
+</html>
