@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SuperClear prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#07385E; --gold:#D5C393;
+  --bg:#E9EDF1; --surface:#FFFFFF; --ink:#0D2236; --muted:#5B6B7B; --line:#D3DAE1;
+  --chip:#F3F5F8; --chipOn:#07385E; --chipOnInk:#FFFFFF; --chipB:#8A6A1F;
+  --focus:#C9A646;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0A1622; --surface:#102131; --ink:#E7EDF3; --muted:#93A4B5; --line:#22374B;
+    --chip:#16293B; --chipOn:#D5C393; --chipOnInk:#07243B; --chipB:#E2B85C; --focus:#D5C393;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0A1622; --surface:#102131; --ink:#E7EDF3; --muted:#93A4B5; --line:#22374B;
+  --chip:#16293B; --chipOn:#D5C393; --chipOnInk:#07243B; --chipB:#E2B85C; --focus:#D5C393;
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:Montserrat,"Helvetica Neue",Arial,sans-serif;font-size:14px;line-height:1.45}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.app{display:grid;grid-template-columns:minmax(0,1fr) 340px;height:100vh;height:100dvh;max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}
+.stage{position:relative;overflow:hidden;min-height:0}
+canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+canvas.drag{cursor:grabbing}
+.brand{position:absolute;left:20px;top:16px;pointer-events:none}
+.brand h1{margin:0;font-size:26px;font-weight:700;letter-spacing:-0.02em;color:var(--ink)}
+.brand p{margin:2px 0 0;color:var(--muted);font-size:12.5px}
+.zoom{position:absolute;right:16px;top:16px;display:flex;flex-direction:column;gap:6px}
+.zoom button{width:36px;height:36px;border-radius:8px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-size:18px;font-weight:600}
+.legend{position:absolute;left:20px;bottom:16px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:12px;max-width:calc(100% - 40px)}
+.legend .t{font-weight:600;margin-bottom:6px}
+.legend .items{display:flex;flex-wrap:wrap;gap:6px 14px}
+.legend .it{display:flex;align-items:center;gap:6px}
+.legend .sw{width:12px;height:12px;border-radius:50%}
+.legend .ramp{height:10px;width:220px;border-radius:5px}
+.legend .ends{display:flex;justify-content:space-between;width:220px;color:var(--muted);margin-top:3px}
+.perf{position:absolute;right:16px;bottom:16px;font-size:11px;color:var(--muted);text-align:right;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-variant-numeric:tabular-nums}
+.tip{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:12.5px;min-width:200px;max-width:260px;box-shadow:0 6px 24px rgba(7,56,94,.18);display:none;z-index:5}
+.tip b{font-weight:600}
+.tip .h{font-weight:700;font-size:13.5px;margin-bottom:2px}
+.tip .sub{color:var(--muted);margin-bottom:6px}
+.tip .row{display:flex;justify-content:space-between;gap:12px;font-variant-numeric:tabular-nums}
+.rail{background:var(--surface);border-left:1px solid var(--line);overflow-y:auto;padding:18px 18px 28px}
+.group{margin-bottom:20px}
+.group h2{font-size:13px;font-weight:700;margin:0 0 8px}
+.seg{display:flex;background:var(--chip);border-radius:9px;padding:3px;gap:3px}
+.seg button{flex:1;border:0;background:transparent;padding:7px 6px;border-radius:7px;cursor:pointer;font-size:12.5px;font-weight:500}
+.seg button[aria-pressed="true"]{background:var(--chipOn);color:var(--chipOnInk);font-weight:600}
+.lens{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.lens button{border:1px solid var(--line);background:var(--chip);border-radius:8px;padding:8px;cursor:pointer;text-align:left;font-size:12.5px}
+.lens button[aria-pressed="true"]{background:var(--chipOn);color:var(--chipOnInk);border-color:var(--chipOn);font-weight:600}
+.lens button:disabled{opacity:.4;cursor:not-allowed}
+.presets{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.presets button{border:1px solid var(--line);background:transparent;border-radius:999px;padding:4px 10px;cursor:pointer;font-size:12px}
+.games{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.g{position:relative;border:1px solid var(--line);background:var(--chip);border-radius:8px;padding:6px 6px 9px;cursor:pointer;text-align:left;font-size:11px;line-height:1.25;overflow:hidden}
+.g .d{color:var(--muted);font-size:10.5px}
+.g .o{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.games.dense{grid-template-columns:repeat(6,1fr);gap:4px}
+.games.dense .g{padding:4px 4px 7px;font-size:10px}
+.games.dense .g .d{font-size:9.5px}
+.g .bar{position:absolute;left:0;bottom:0;height:3px;background:var(--muted);opacity:.55}
+.g.a{background:var(--chipOn);color:var(--chipOnInk);border-color:var(--chipOn)}
+.g.a .d{color:inherit;opacity:.75}
+.g.a .bar{background:var(--gold);opacity:1}
+.g.b{border:2px solid var(--chipB)}
+.g .badge{position:absolute;right:4px;top:3px;font-size:9.5px;font-weight:700;color:var(--chipB)}
+.g.a .badge{color:var(--gold)}
+.cmp{display:flex;align-items:center;gap:8px;margin:10px 0 0;font-size:12.5px}
+.cmp input{accent-color:var(--navy);width:16px;height:16px}
+.edit{margin-top:8px;display:none}
+.edit.on{display:flex}
+.stats{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:12.5px}
+.stats td,.stats th{padding:5px 0;border-bottom:1px solid var(--line);text-align:right}
+.stats th{font-weight:600;color:var(--muted);font-size:11.5px}
+.stats td:first-child,.stats th:first-child{text-align:left;color:var(--muted)}
+.mix{display:flex;height:10px;border-radius:5px;overflow:hidden;margin-top:10px}
+.mixk{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:6px;font-size:11.5px;color:var(--muted)}
+.mixk span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;background:var(--c)}
+.note{font-size:12px;color:var(--muted);margin-top:14px}
+@media (max-width:820px){
+  .app{grid-template-columns:1fr;grid-template-rows:62vh auto;height:auto;max-height:none}
+  .rail{border-left:0;border-top:1px solid var(--line);overflow:visible}
+  .brand h1{font-size:21px}
+  .legend .ramp,.legend .ends{width:160px}
+  .perf{display:none}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="stage" id="stage">
+    <canvas id="cv" aria-label="Stadium seat map"></canvas>
+    <div class="brand"><h1>SuperClear</h1><p id="sub">Prototype with a fictional ground and season</p></div>
+    <div class="zoom">
+      <button id="zin" aria-label="Zoom in">+</button>
+      <button id="zout" aria-label="Zoom out">&minus;</button>
+      <button id="zfit" aria-label="Reset view" style="font-size:13px">&#x2922;</button>
+    </div>
+    <div class="legend" id="legend"></div>
+    <div class="perf" id="perf"></div>
+    <div class="tip" id="tip"></div>
+  </div>
+  <aside class="rail">
+    <div class="group">
+      <h2>View</h2>
+      <div class="seg" id="viewSeg">
+        <button data-v="seat" aria-pressed="true">Seats</button>
+        <button data-v="section" aria-pressed="false">Sections</button>
+      </div>
+    </div>
+    <div class="group">
+      <h2>Colour by</h2>
+      <div class="lens" id="lens">
+        <button data-l="type" aria-pressed="true">Ticket type</button>
+        <button data-l="cap" aria-pressed="false">Capacity %</button>
+        <button data-l="rps" aria-pressed="false">Revenue Per Seat</button>
+        <button data-l="cat" aria-pressed="false">Price category</button>
+        <button data-l="chg" aria-pressed="false" disabled>Change, A to B</button>
+      </div>
+    </div>
+    <div class="group">
+      <h2>Games</h2>
+      <div class="presets">
+        <button data-p="all">All</button>
+        <button data-p="wknd">Weekend</button>
+        <button data-p="mid">Midweek</button>
+        <button data-p="none">Clear</button>
+      </div>
+      <div class="games" id="games"></div>
+      <label class="cmp"><input type="checkbox" id="cmp"> Compare two sets of games</label>
+      <div class="seg edit" id="editSeg">
+        <button data-e="A" aria-pressed="true">Editing set A</button>
+        <button data-e="B" aria-pressed="false">Editing set B</button>
+      </div>
+    </div>
+    <div class="group">
+      <h2>ScalePower (mock)</h2>
+      <label class="cmp" style="margin:0"><input type="checkbox" id="opp" checked> Show pricing opportunities</label>
+    </div>
+    <div class="group">
+      <h2>Stress test</h2>
+      <div class="seg" id="sizeSeg" style="margin-bottom:6px">
+        <button data-s="6" aria-pressed="true">6,000 seats</button>
+        <button data-s="25" aria-pressed="false">25,000</button>
+        <button data-s="50" aria-pressed="false">50,000</button>
+      </div>
+      <div class="seg" id="yrSeg">
+        <button data-y="1" aria-pressed="true">1 season</button>
+        <button data-y="3" aria-pressed="false">3 seasons</button>
+      </div>
+    </div>
+    <div class="group">
+      <h2 id="statsTitle">Selection</h2>
+      <table class="stats" id="stats"></table>
+      <div class="mix" id="mix"></div>
+      <div class="mixk" id="mixk"></div>
+      <p class="note">Drag to move, scroll or pinch to zoom. Hover or tap a seat or section for detail.</p>
+    </div>
+  </aside>
+</div>
+<script>
+// ---- geometry + data model (shared with page) ----
+function buildModel(opt){
+  opt=opt||{size:6,seasons:1};
+  const CFG={6:{perRow:96,side:20,end:10},25:{perRow:190,side:40,end:22},50:{perRow:270,side:56,end:32}}[opt.size];
+  let s=20271+opt.size*7+opt.seasons;const rnd=()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;};
+  const Y0=40, HALF=46, perRow=CFG.perRow, SIDE_ROWS=CFG.side, END_ROWS=CFG.end, A0=14;
+  const SP=2*HALF/perRow, ROWSP=1.3*SP;
+  const seats=[]; const sections=[];
+  const CAT={P:{n:'Premium',p:85},C1:{n:'Cat 1',p:55},C2:{n:'Cat 2',p:40},C3:{n:'Cat 3',p:28},C4:{n:'Cat 4',p:18}};
+  const frontRow=(r,rows)=>r<Math.max(2,Math.round(rows*0.1));
+  const sideSecs=8;
+  const bounds=[];for(let i=0;i<=sideSecs;i++)bounds.push(Math.round(i*perRow/sideSecs));
+  ['M','O'].forEach((side)=>{
+    for(let k=0;k<sideSecs;k++){
+      const id=(side==='M'?'1':'2')+String(k+1).padStart(2,'0');
+      const sec={id,stand:side==='M'?'Main':'Opposite',idx:k,seats:[]};sections.push(sec);
+      for(let r=0;r<SIDE_ROWS;r++){
+        const y=(Y0+r*ROWSP)*(side==='M'?1:-1); const fr=r/SIDE_ROWS;
+        for(let j=bounds[k];j<bounds[k+1];j++){
+          const x=-HALF+(j+0.5)*SP;
+          const centre=(k===3||k===4), flank=(k===2||k===5);
+          let cat;
+          if(side==='M'&&centre&&fr<0.4)cat='P';
+          else if(centre)cat='C1';
+          else if(flank&&fr<0.5)cat='C1';
+          else if(fr<0.5)cat='C2';
+          else cat='C3';
+          if(side==='O'&&centre)cat='C1';
+          const st={sec:sections.length-1,row:r+1,num:j-bounds[k]+1,x,y,cat,front:frontRow(r,SIDE_ROWS),fr};
+          sec.seats.push(seats.length);seats.push(st);
+        }
+      }
+    }
+  });
+  const endSecs=4;
+  ['W','E'].forEach((end)=>{
+    const sgn=end==='E'?1:-1;
+    const base=sections.length;
+    for(let k=0;k<endSecs;k++)sections.push({id:(end==='W'?'3':'4')+String(k+1).padStart(2,'0'),stand:end==='W'?'West curve':'East curve',idx:k,seats:[],geo:{sgn,k,n:endSecs}});
+    for(let r=0;r<END_ROWS;r++){
+      const a=A0+r*ROWSP*1.6, b=Y0+r*ROWSP;
+      const N=600;const pts=[];let L=0;let prev=null;
+      for(let i=0;i<=N;i++){const t=-Math.PI/2+Math.PI*i/N;const p=[sgn*(HALF+a*Math.cos(t)),b*Math.sin(t)];if(prev)L+=Math.hypot(p[0]-prev[0],p[1]-prev[1]);pts.push([p,L,t]);prev=p;}
+      const n=Math.floor(L/SP);let i=1;
+      for(let j=0;j<n;j++){
+        const target=(j+0.5)*L/n;while(pts[i][1]<target)i++;
+        const p=pts[i][0];
+        const k=Math.min(endSecs-1,Math.floor((pts[i][2]+Math.PI/2)/Math.PI*endSecs));
+        const st={sec:base+k,row:r+1,num:0,x:p[0],y:p[1],cat:'C4',front:frontRow(r,END_ROWS),fr:r/END_ROWS};
+        sections[base+k].seats.push(seats.length);seats.push(st);
+      }
+    }
+    for(let k=0;k<endSecs;k++){const sec=sections[base+k];const cnt={};sec.seats.forEach(i=>{const st=seats[i];cnt[st.row]=(cnt[st.row]||0)+1;st.num=cnt[st.row];});}
+  });
+  const opp=[['Harbor City',2,0],['Dunmore Athletic',1,1],['Coastal Rovers',1,0],['Valley United',0,0],['Ironbridge FC',1,1],['Northgate',0,0],['Redcliff Town',0,0],['Lakeshore SC',0,1],['Pinewood',0,0],['Granite FC',0,0],['Sutton Bay',1,0],['Westvale (derby)',3,0],['Ashford Rangers',1,1],['Carrow City',1,0],['Bramley',2,0],['Kingsport',2,0]];
+  const dates=['Mar 13','Mar 27','Apr 08','Apr 24','May 06','May 22','Jun 05','Jun 17','Jul 03','Jul 17','Aug 07','Aug 21','Sep 02','Sep 18','Oct 02','Oct 16'];
+  const games=[];const firstYr=28-opt.seasons;
+  for(let y=0;y<opt.seasons;y++)opp.forEach((o,i)=>games.push({i:games.length,opp:o[0],str:o[1],mid:!!o[2],date:dates[i],yr:firstYr+y,slump:i>=6&&i<=9,grow:1-(opt.seasons-1-y)*0.05}));
+  const G=games.length,S=seats.length;
+  const type=new Uint8Array(G*S);
+  const paid=new Float32Array(G*S);
+  const seasonP={P:.5,C1:.52,C2:.3,C3:.25,C4:.0};
+  const isSeason=new Uint8Array(S);
+  games.forEach(g=>{
+    if(g.i%16===0){ // new season: re-draw season holders
+      seats.forEach((st,i)=>{const sec=sections[st.sec];let p=seasonP[st.cat]*g.grow;
+        if(sec.stand==='West curve')p=.36*g.grow;
+        if(st.front&&st.cat!=='P')p*=.5;
+        if(sec.stand==='Opposite'&&st.cat==='C1')p*=.75;
+        isSeason[i]=rnd()<p?1:0;});
+    }
+    let gf=[0.92,1.22,1.45,2.8][g.str]*g.grow; if(g.slump)gf*=.72;
+    const mid=g.mid?.68:1;
+    for(let i=0;i<S;i++){
+      const st=seats[i];const k=g.i*S+i;const sec=sections[st.sec];const price=CAT[st.cat].p;
+      if(isSeason[i]){type[k]=1;paid[k]=price*.8;continue;}
+      let p;
+      if(st.cat==='P')p=.96;
+      else if(st.cat==='C1')p=sec.stand==='Main'?.72:.56;
+      else if(st.cat==='C2')p=.3;
+      else if(st.cat==='C3')p=.68;
+      else if(sec.stand==='West curve')p=.78;
+      else { p=.2; if(sec.idx===1&&g.str>=1)p=g.str>=2?.9:.5; }
+      if(st.front&&st.cat!=='P')p*=.45;
+      if(st.cat!=='P'){p*=gf*mid;}
+      if(rnd()<Math.min(p,.985)){
+        let gp=.06; if(st.cat==='C4')gp=sec.stand==='West curve'?.38:.3; if(st.cat==='C3')gp=.2;
+        if(g.mid)gp*=.4;
+        const t=rnd()<gp?3:2;
+        type[k]=t; const dyn=g.str>=2?1.15:(g.str===0?.9:1);
+        paid[k]=t===3?price*.75:price*dyn;
+      } else {
+        let cp=.035;
+        if(sec.stand==='Opposite'&&(sec.idx>=2&&sec.idx<=5)&&st.fr<0.6&&(g.str===0||g.slump))cp=.7;
+        if(rnd()<cp){type[k]=4;paid[k]=0;}
+      }
+    }
+  });
+  return {seats,sections,games,type,paid,CAT,G,S,GEO:{ROWSP,Y0,HALF,END_ROWS,A0,SP}};
+}
+
+let opts={size:6,seasons:1};
+let M,seats,sections,games,type,paid,CAT,G,S,GEO;
+function loadModel(){M=buildModel(opts);({seats,sections,games,type,paid,CAT,G,S,GEO}=M);}
+loadModel();
+const CATS=['P','C1','C2','C3','C4'];
+const $=id=>document.getElementById(id);
+const cv=$('cv'),ctx=cv.getContext('2d'),stage=$('stage'),tip=$('tip');
+const mq=matchMedia('(prefers-color-scheme: dark)');
+let dark=mq.matches;
+
+// ---------- palettes ----------
+function pal(){
+  return dark?{
+    unsold:'#253747',season:'#33C49A',single:'#F2B33D',group:'#7DC8F0',comp:'#E39CC4',
+    pitch:'#1F4A35',pitchB:'#245339',lines:'rgba(255,255,255,.35)',sep:'#0A1622',label:'#E7EDF3',hover:'#FFFFFF',
+    capRamp:['#253747','#3D5A73','#5E86A8','#A9B98F','#D5C393','#F2E3B3'],
+    rpsRamp:['#253747','#3B3460','#54478F','#7A6DB8','#A99EDB','#DCD6F5'],
+    catCol:{P:'#F2E3B3',C1:'#D5C393',C2:'#8FB3D1',C3:'#5E86A8',C4:'#3D5A73'},
+    div:['#E07A5F','#9C5A4C','#3A4652','#4E8F72','#7FD1A8']
+  }:{
+    unsold:'#D6DCE3',season:'#009E73',single:'#E69F00',group:'#56B4E9',comp:'#CC79A7',
+    pitch:'#4C8B63',pitchB:'#559670',lines:'rgba(255,255,255,.7)',sep:'#E9EDF1',label:'#0D2236',hover:'#0D2236',
+    capRamp:['#DDE2E8','#B7C8D8','#86A6C3','#4F7FA6','#245883','#07385E'],
+    rpsRamp:['#F2F0F7','#CBC9E2','#9E9AC8','#756BB1','#54278F','#3F007D'],
+    catCol:{P:'#07385E',C1:'#2F6690',C2:'#6C9BC0',C3:'#A9C3D8',C4:'#D5C393'},
+    div:['#B4533C','#D9998A','#E2E6EA','#86C1A2','#2F7D5B']
+  };
+}
+let P=pal();
+const hex=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+function rampAt(r,t){t=Math.max(0,Math.min(1,t));const f=t*(r.length-1),i=Math.min(r.length-2,Math.floor(f)),u=f-i;const a=hex(r[i]),b=hex(r[i+1]);return 'rgb('+a.map((v,k)=>Math.round(v+(b[k]-v)*u)).join(',')+')';}
+function mixCol(c1,c2,t){const a=hex(c1),b=hex(c2);return 'rgb('+a.map((v,k)=>Math.round(v+(b[k]-v)*t)).join(',')+')';}
+
+// ---------- state ----------
+const st={view:'seat',lens:'type',A:new Set(games.map(g=>g.i)),B:new Set(),cmp:false,edit:'A'};
+let gameCap,seatCol,secCol,secPoly,hash;
+const fmt=n=>n.toLocaleString('en-US',{maximumFractionDigits:0});
+const usd=n=>'$'+n.toLocaleString('en-US',{maximumFractionDigits:0});
+const usd2=n=>'$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const pct=n=>(n*100).toFixed(0)+'%';
+
+// game-level capacity for chip bars
+function computeGameCap(){gameCap=games.map(g=>{let c=0;for(let i=0;i<S;i++)if(type[g.i*S+i])c++;return c/S;});}
+
+// ---------- aggregation ----------
+let aggA,aggB;
+function aggregate(set){
+  const ids=[...set];const n=ids.length;
+  const sold=new Uint8Array(S),rev=new Float32Array(S),tc=new Uint8Array(S*5);
+  for(const g of ids){const o=g*S;for(let i=0;i<S;i++){const t=type[o+i];tc[i*5+t]++;if(t){sold[i]++;rev[i]+=paid[o+i];}}}
+  const sec=sections.map(s=>{let so=0,r=0;const m=[0,0,0,0,0];for(const i of s.seats){so+=sold[i];r+=rev[i];for(let t=0;t<5;t++)m[t]+=tc[i*5+t];}
+    const cap=s.seats.length*n;return {cap:n?so/cap:0,rps:n?r/cap:0,mix:m,sold:so,rev:r};});
+  let so=0,r=0;const mix=[0,0,0,0,0];for(let i=0;i<S;i++){so+=sold[i];r+=rev[i];for(let t=0;t<5;t++)mix[t]+=tc[i*5+t];}
+  return {n,ids,sold,rev,tc,sec,tot:{sold:so,rev:r,mix,cap:n?so/(S*n):0,rps:n?r/(S*n):0}};
+}
+const RPS_MAX=90;
+
+// ---------- colours per seat / section ----------
+const typeName=['Unsold','Season','Single','Group','Comp'];
+function typeCols(){return [P.unsold,P.season,P.single,P.group,P.comp];}
+function colourise(){
+  const tcs=typeCols();const a=aggA,b=aggB;
+  for(let i=0;i<S;i++){
+    let c;
+    if(st.lens==='cat')c=P.catCol[seats[i].cat];
+    else if(!a.n)c=P.unsold;
+    else if(st.lens==='type'){let best=0,bv=-1;for(let t=0;t<5;t++){const v=a.tc[i*5+t];if(v>bv||(v===bv&&t>0)){bv=v;best=t;}}c=tcs[best];}
+    else if(st.lens==='cap')c=rampAt(P.capRamp,a.sold[i]/a.n);
+    else if(st.lens==='rps')c=rampAt(P.rpsRamp,(a.rev[i]/a.n)/RPS_MAX);
+    else if(st.lens==='chg'){c=(b&&b.n)?divAt(b.sold[i]/b.n-a.sold[i]/a.n):P.unsold;}
+    seatCol[i]=c;
+  }
+  sections.forEach((s,k)=>{
+    let c;const sa=a.sec[k];
+    if(st.lens==='cat'){const cnt={};s.seats.forEach(i=>cnt[seats[i].cat]=(cnt[seats[i].cat]||0)+1);c=P.catCol[Object.keys(cnt).sort((x,y)=>cnt[y]-cnt[x])[0]];}
+    else if(!a.n)c=P.unsold;
+    else if(st.lens==='type'){let best=1,bv=-1;for(let t=1;t<5;t++)if(sa.mix[t]>bv){bv=sa.mix[t];best=t;}c=mixCol(P.unsold,tcs[best],Math.min(1,sa.cap*1.1));}
+    else if(st.lens==='cap')c=rampAt(P.capRamp,sa.cap);
+    else if(st.lens==='rps')c=rampAt(P.rpsRamp,sa.rps/RPS_MAX);
+    else if(st.lens==='chg')c=(b&&b.n)?divAt(b.sec[k].cap-sa.cap):P.unsold;
+    secCol[k]=c;
+  });
+  // bucket seats by colour for batched drawing
+  buckets=new Map();for(let i=0;i<S;i++){const c=seatCol[i];let arr=buckets.get(c);if(!arr){arr=[];buckets.set(c,arr);}arr.push(i);}
+}
+function divAt(d){return rampAt(P.div,0.5+d/0.8);} // ±40 pts saturates
+let buckets=new Map();
+
+// ---------- section outlines ----------
+function buildGeo(){
+seatCol=new Array(S);secCol=new Array(sections.length);
+secPoly=sections.map(s=>{
+  const rows={};s.seats.forEach(i=>{const r=seats[i].row;(rows[r]=rows[r]||[]).push(i);});
+  const rk=Object.keys(rows).map(Number).sort((a,b)=>a-b);
+  const first=rows[rk[0]],last=rows[rk[rk.length-1]];
+  const pts=[];first.forEach(i=>pts.push([seats[i].x,seats[i].y]));
+  for(let j=1;j<rk.length;j++){const r=rows[rk[j]];const i=r[r.length-1];pts.push([seats[i].x,seats[i].y]);}
+  for(let j=last.length-2;j>=0;j--){const i=last[j];pts.push([seats[i].x,seats[i].y]);}
+  for(let j=rk.length-2;j>0;j--){const i=rows[rk[j]][0];pts.push([seats[i].x,seats[i].y]);}
+  if(s.geo){pts.length=0;const {sgn,k,n}=s.geo;const t0=-Math.PI/2+k*Math.PI/n+0.014,t1=-Math.PI/2+(k+1)*Math.PI/n-0.014;
+    const ell=(r,t)=>{const a=GEO.A0+r*GEO.ROWSP*1.6,b=GEO.Y0+r*GEO.ROWSP;return [sgn*(GEO.HALF+a*Math.cos(t)),b*Math.sin(t)];};
+    for(let i=0;i<=24;i++)pts.push(ell(0,t0+(t1-t0)*i/24));for(let i=24;i>=0;i--)pts.push(ell(GEO.END_ROWS-1,t0+(t1-t0)*i/24));}
+  const p=new Path2D();pts.forEach((q,j)=>j?p.lineTo(q[0],q[1]):p.moveTo(q[0],q[1]));p.closePath();
+  let cx=0,cy=0;s.seats.forEach(i=>{cx+=seats[i].x;cy+=seats[i].y;});cx/=s.seats.length;cy/=s.seats.length;
+  return {path:p,pts,cx,cy};
+});
+
+// ---------- spatial hash for hit testing ----------
+hash=new Map();
+seats.forEach((s,i)=>{const k=Math.floor(s.x/CELL)+','+Math.floor(s.y/CELL);let a=hash.get(k);if(!a){a=[];hash.set(k,a);}a.push(i);});
+computeGameCap();
+opps=[['101','102','Main stand, west wing'],['107','108','Main stand, east wing'],['201','202','Opposite stand, west wing'],['207','208','Opposite stand, east wing']].map(([a,b,name])=>{
+  const ids=sections.filter(x=>x.id===a||x.id===b).flatMap(x=>x.seats);
+  const c2=ids.filter(i=>seats[i].cat==='C2'&&!seats[i].front),c3=ids.filter(i=>seats[i].cat==='C3');
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;ids.filter(i=>seats[i].cat==='C2').forEach(i=>{const q=seats[i];x0=Math.min(x0,q.x);x1=Math.max(x1,q.x);y0=Math.min(y0,q.y);y1=Math.max(y1,q.y);});
+  const pad=GEO.SP*0.7;return {name,c2,c3,box:[x0-pad,y0-pad,x1-x0+2*pad,y1-y0+2*pad],cx:(x0+x1)/2,cy:(y0+y1)/2};});
+}
+let opps=[];
+const CELL=2;
+buildGeo();
+function seatAt(wx,wy){const rr=0.6*GEO.SP;let best=-1,bd=rr*rr;const cx=Math.floor(wx/CELL),cy=Math.floor(wy/CELL);
+  for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++){const a=hash.get((cx+dx)+','+(cy+dy));if(!a)continue;for(const i of a){const d=(seats[i].x-wx)**2+(seats[i].y-wy)**2;if(d<bd){bd=d;best=i;}}}return best;}
+function sectionAt(wx,wy){ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.lineWidth=1.6;let r=-1;
+  for(let k=0;k<sections.length;k++){if(ctx.isPointInPath(secPoly[k].path,wx,wy)||ctx.isPointInStroke(secPoly[k].path,wx,wy)){r=k;break;}}ctx.restore();return r;}
+
+// ---------- view transform ----------
+let W=0,H=0,dpr=1,z=1,px=0,py=0,fitZ=1;
+function resize(){const r=stage.getBoundingClientRect();W=r.width;H=r.height;dpr=window.devicePixelRatio||1;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
+  const nf=Math.min(W/162,(H-70)/140);if(z===fitZ||!z)z=nf;fitZ=nf;requestDraw();}
+function fit(){z=fitZ;px=0;py=10;requestDraw();}
+const toWorld=(sx,sy)=>[(sx-W/2-px)/z,(sy-H/2-py)/z];
+
+// ---------- drawing ----------
+let hover={seat:-1,sec:-1},pending=false;const drawTimes=[];let lastRecalc=0,lastBuild=0;
+function requestDraw(){if(!pending){pending=true;requestAnimationFrame(draw);}}
+function draw(){
+  pending=false;const t0=performance.now();
+  ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.setTransform(dpr*z,0,0,dpr*z,dpr*(W/2+px),dpr*(H/2+py));
+  // pitch
+  ctx.fillStyle=P.pitch;ctx.fillRect(-54,-36,108,72);
+  ctx.fillStyle=P.pitchB;for(let i=0;i<10;i+=2)ctx.fillRect(-52.5+i*10.5,-34,10.5,68);
+  ctx.strokeStyle=P.lines;ctx.lineWidth=0.35;ctx.strokeRect(-52.5,-34,105,68);
+  ctx.beginPath();ctx.moveTo(0,-34);ctx.lineTo(0,34);ctx.stroke();
+  ctx.beginPath();ctx.arc(0,0,9.15,0,Math.PI*2);ctx.stroke();
+  ctx.strokeRect(-52.5,-20.15,16.5,40.3);ctx.strokeRect(36,-20.15,16.5,40.3);
+  if(st.view==='seat'){
+    const R=0.45*GEO.SP;const [vx0,vy0]=toWorld(-10,-10),[vx1,vy1]=toWorld(W+10,H+10);const useRect=R*z<2.2;
+    for(const [c,arr] of buckets){ctx.fillStyle=c;ctx.beginPath();
+      if(useRect){const d=R*1.8;for(const i of arr){const s=seats[i];if(s.x<vx0||s.x>vx1||s.y<vy0||s.y>vy1)continue;ctx.rect(s.x-d/2,s.y-d/2,d,d);}}
+      else for(const i of arr){const s=seats[i];if(s.x<vx0||s.x>vx1||s.y<vy0||s.y>vy1)continue;ctx.moveTo(s.x+R,s.y);ctx.arc(s.x,s.y,R,0,6.2832);}
+      ctx.fill();}
+    if(hover.seat>=0){const s=seats[hover.seat];ctx.strokeStyle=P.hover;ctx.lineWidth=0.22;ctx.lineWidth=0.25*GEO.SP;ctx.beginPath();ctx.arc(s.x,s.y,0.75*GEO.SP,0,6.2832);ctx.stroke();}
+    if(z>fitZ*1.6)labels(0.8);
+  } else {
+    ctx.lineJoin='round';
+    sections.forEach((s,k)=>{const p=secPoly[k].path;ctx.fillStyle=secCol[k];ctx.strokeStyle=secCol[k];ctx.lineWidth=0.45;ctx.fill(p);ctx.stroke(p);});
+    if(hover.sec>=0){ctx.strokeStyle=P.hover;ctx.lineWidth=Math.max(0.35,2/z);ctx.stroke(secPoly[hover.sec].path);}
+    labels(1);
+  }
+  if($('opp').checked)drawOpps();
+  const dt=performance.now()-t0;drawTimes.push(dt);if(drawTimes.length>30)drawTimes.shift();
+  $('perf').innerHTML=S.toLocaleString('en-US')+' seats, '+G+' games<br>Redraw '+(drawTimes.reduce((a,b)=>a+b,0)/drawTimes.length).toFixed(1)+' ms<br>Recalculate '+lastRecalc.toFixed(1)+' ms'+(lastBuild?'<br>Build data '+lastBuild.toFixed(0)+' ms':'');
+}
+function drawOpps(){
+  ctx.save();ctx.setLineDash([0.8,0.6].map(v=>v*Math.max(1,3/z)));ctx.lineWidth=Math.max(0.25,1.6/z);ctx.strokeStyle=dark?'#FFFFFF':'#0D2236';
+  opps.forEach((o,k)=>{ctx.globalAlpha=hover.opp===k?1:0.75;ctx.strokeRect(...o.box);});ctx.restore();
+  ctx.save();ctx.setTransform(dpr,0,0,dpr,0,0);
+  opps.forEach((o,k)=>{const x=W/2+px+o.cx*z,y=H/2+py+(o.cy>0?o.box[1]*z-6:(o.box[1]+o.box[3])*z+6);o.sx=x;o.sy=y;
+    const r=hover.opp===k?14:12;ctx.shadowColor='rgba(0,0,0,.3)';ctx.shadowBlur=6;ctx.fillStyle=dark?'#FFFFFF':'#0D2236';
+    ctx.beginPath();ctx.arc(x,y,r,0,6.2832);ctx.fill();ctx.shadowBlur=0;ctx.lineWidth=2;ctx.strokeStyle=dark?'#0D2236':'#FFFFFF';ctx.stroke();
+    ctx.fillStyle=dark?'#0D2236':'#FFFFFF';ctx.font='700 13px Montserrat, Arial, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('$',x,y+0.5);});
+  ctx.restore();
+}
+function oppStats(o){const a=aggA;if(!a.n)return null;const f=ids=>{let so=0,r=0;ids.forEach(i=>{so+=a.sold[i];r+=a.rev[i];});const c=ids.length*a.n;return {cap:so/c,rps:r/c};};return {c2:f(o.c2),c3:f(o.c3)};}
+function labels(alpha){
+  ctx.save();ctx.globalAlpha=alpha;ctx.textAlign='center';ctx.textBaseline='middle';
+  const fs=Math.min(3.2,Math.max(1.6,11/z));ctx.font='600 '+fs+'px Montserrat, Arial, sans-serif';
+  sections.forEach((s,k)=>{const q=secPoly[k];
+    let txt=s.id;
+    if(st.view==='section'&&aggA.n&&z>4.2){const v=st.lens==='chg'&&aggB&&aggB.n?Math.round((aggB.sec[k].cap-aggA.sec[k].cap)*100):null;
+      txt+= st.lens==='rps'?' '+usd(aggA.sec[k].rps): st.lens==='chg'? (v!==null?' '+(v>0?'+':'')+v:''): st.lens==='cat'?'':' '+pct(aggA.sec[k].cap);}
+    const col=secCol[k]||P.unsold;const lum=(c=>{const m=c.match(/\d+/g);if(!m){const h=hex(c);return (h[0]*299+h[1]*587+h[2]*114)/1000;}return (m[0]*299+m[1]*587+m[2]*114)/1000;})(st.view==='section'?col:P.unsold);
+    ctx.fillStyle=st.view==='section'?(lum>140?'#0D2236':'#FFFFFF'):P.label;
+    ctx.fillText(txt,q.cx,q.cy);});
+  ctx.restore();
+}
+
+// ---------- recalc ----------
+function recalc(){
+  const t0=performance.now();
+  aggA=aggregate(st.A);aggB=st.cmp?aggregate(st.B):null;
+  colourise();lastRecalc=performance.now()-t0;
+  renderGames();renderStats();renderLegend();requestDraw();
+}
+
+// ---------- UI ----------
+function renderGames(){
+  $('games').classList.toggle('dense',G>16);const yl=g=>G>16?' ’'+g.yr:'';
+  $('games').innerHTML=games.map(g=>{const a=st.A.has(g.i),b=st.cmp&&st.B.has(g.i);
+    const badge=st.cmp?(a&&b?'A B':a?'A':b?'B':''):'';
+    return `<button class="g${a?' a':''}${b?' b':''}" data-g="${g.i}" aria-pressed="${a||b}" title="${g.opp}, ${g.date} 20${g.yr}${g.mid?', midweek':''}">
+      <div class="d">${g.date}${yl(g)}${g.mid?' mid':''}</div><div class="o">${g.opp.replace(' (derby)','')}</div>${badge?`<span class="badge">${badge}</span>`:''}
+      <div class="bar" style="width:${(gameCap[g.i]*100).toFixed(0)}%"></div></button>`;}).join('');
+}
+function statRows(ag){const n=ag.n;if(!n)return null;const t=ag.tot;
+  return {games:n,att:t.sold/n,cap:t.cap,rev:t.rev/n,rps:t.rps,season:t.mix[1]/n};}
+function renderStats(){
+  const a=statRows(aggA),b=aggB?statRows(aggB):null;
+  const L=[['Games','games',v=>fmt(v)],['Avg attendance','att',v=>fmt(v)],['Capacity %','cap',pct],['Revenue per game','rev',usd],['Revenue Per Seat','rps',usd2]];
+  let h='';
+  if(st.cmp){$('statsTitle').textContent='Set A against set B';
+    h='<tr><th></th><th>A</th><th>B</th><th>Change</th></tr>'+L.map(([n,k,f])=>{const va=a?a[k]:null,vb=b?b[k]:null;let d='';
+      if(a&&b&&k!=='games'){const dv=vb-va;d=k==='cap'?((dv>0?'+':'')+(dv*100).toFixed(0)+' pts'):k==='rps'?((dv>=0?'+':'−')+usd2(Math.abs(dv))):((dv>=0?'+':'−')+(k==='rev'?usd(Math.abs(dv)):fmt(Math.abs(dv))));}
+      return `<tr><td>${n}</td><td>${va!==null?f(va):'–'}</td><td>${vb!==null?f(vb):'–'}</td><td>${d||'–'}</td></tr>`;}).join('');
+  } else {$('statsTitle').textContent=aggA.n===1?games[[...st.A][0]].opp+', '+games[[...st.A][0]].date:'Selection';
+    h=L.map(([n,k,f])=>`<tr><td>${n}</td><td>${a?f(a[k]):'–'}</td></tr>`).join('');}
+  $('stats').innerHTML=h;
+  const m=aggA.tot.mix;const sold=m[1]+m[2]+m[3]+m[4];const tcs=typeCols();
+  $('mix').innerHTML=sold?[1,2,3,4].map(t=>`<div style="width:${m[t]/sold*100}%;background:${tcs[t]}"></div>`).join(''):'';
+  $('mixk').innerHTML=sold?[1,2,3,4].map(t=>`<span style="--c:${tcs[t]}">${typeName[t]} ${pct(m[t]/sold)}</span>`).join(''):(aggA.n?'':'Pick one or more games to see sales.');
+}
+function renderLegend(){
+  let h='';const tcs=typeCols();
+  if(st.lens==='type'){h=`<div class="t">${st.view==='seat'&&aggA.n>1?'Most common status across selected games':'Ticket type'}</div><div class="items">`+[1,2,3,4,0].map(t=>`<span class="it"><span class="sw" style="background:${tcs[t]}"></span>${typeName[t]}</span>`).join('')+'</div>';}
+  else if(st.lens==='cat'){h='<div class="t">Price category, face value</div><div class="items">'+CATS.map(c=>`<span class="it"><span class="sw" style="background:${P.catCol[c]}"></span>${CAT[c].n} $${CAT[c].p}</span>`).join('')+'</div>';}
+  else{const r=st.lens==='cap'?P.capRamp:st.lens==='rps'?P.rpsRamp:P.div;
+    const t=st.lens==='cap'?(st.view==='seat'?'Share of selected games this seat was sold':'Capacity % for selected games'):st.lens==='rps'?'Revenue Per Seat, per game':'Change in Capacity %, set A to set B';
+    const ends=st.lens==='cap'?['0%','100%']:st.lens==='rps'?['$0','$'+RPS_MAX+'+']:['−40 pts','+40 pts'];
+    h=`<div class="t">${t}</div><div class="ramp" style="background:linear-gradient(90deg,${r.join(',')})"></div><div class="ends"><span>${ends[0]}</span>${st.lens==='chg'?'<span>0</span>':''}<span>${ends[1]}</span></div>`;}
+  $('legend').innerHTML=h;
+}
+$('viewSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;st.view=b.dataset.v;[...$('viewSeg').children].forEach(x=>x.setAttribute('aria-pressed',x===b));hover={seat:-1,sec:-1};hideTip();renderLegend();requestDraw();});
+$('lens').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;st.lens=b.dataset.l;[...$('lens').children].forEach(x=>x.setAttribute('aria-pressed',x===b));recalc();});
+$('games').addEventListener('click',e=>{const b=e.target.closest('.g');if(!b)return;const i=+b.dataset.g;const set=st.cmp&&st.edit==='B'?st.B:st.A;
+  if(e.shiftKey||e.metaKey||e.ctrlKey||st.cmp||set.size!==G){set.has(i)?set.delete(i):set.add(i);}else{set.clear();set.add(i);} recalc();});
+$('games').addEventListener('dblclick',e=>{const b=e.target.closest('.g');if(!b)return;const set=st.cmp&&st.edit==='B'?st.B:st.A;set.clear();set.add(+b.dataset.g);recalc();});
+document.querySelector('.presets').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const set=st.cmp&&st.edit==='B'?st.B:st.A;set.clear();
+  games.forEach(g=>{if(b.dataset.p==='all'||(b.dataset.p==='wknd'&&!g.mid)||(b.dataset.p==='mid'&&g.mid))set.add(g.i);});recalc();});
+$('cmp').addEventListener('change',e=>{st.cmp=e.target.checked;$('editSeg').classList.toggle('on',st.cmp);const cb=document.querySelector('[data-l="chg"]');cb.disabled=!st.cmp;
+  if(st.cmp){if(!st.B.size){st.A=new Set(games.filter(g=>!g.mid).map(g=>g.i));st.B=new Set(games.filter(g=>g.mid).map(g=>g.i));}setLens('chg');setEdit('B');}
+  else{if(st.lens==='chg')setLens('cap');}recalc();});
+function setLens(l){st.lens=l;[...$('lens').children].forEach(x=>x.setAttribute('aria-pressed',x.dataset.l===l));}
+function setEdit(v){st.edit=v;[...$('editSeg').children].forEach(x=>x.setAttribute('aria-pressed',x.dataset.e===v));}
+$('editSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setEdit(b.dataset.e);});
+
+// ---------- tooltip ----------
+function hideTip(){tip.style.display='none';}
+function showOppTip(k,sx,sy){const o=opps[k],v=oppStats(o);
+  let h=`<div class="h">Pricing opportunity</div><div class="sub">${o.name}, Cat 2 at $40</div>`;
+  if(v){h+=`<div class="row"><span></span><span><b>Cat 2</b> &nbsp; <b>Cat 3 behind</b></span></div>
+    <div class="row"><span>Capacity %</span><span>${pct(v.c2.cap)} &nbsp; ${pct(v.c3.cap)}</span></div>
+    <div class="row"><span>Revenue Per Seat</span><span>${usd2(v.c2.rps)} &nbsp; ${usd2(v.c3.rps)}</span></div>
+    <div style="margin-top:6px">${v.c3.rps>v.c2.rps?'The cheaper seats behind earn more per seat.':'Cat 2 sells far below the seats behind it.'}</div>`;}
+  else h+='<div>Pick one or more games to see the numbers.</div>';
+  h+='<div class="sub" style="margin:6px 0 0">Click for detail (next mock)</div>';
+  tip.innerHTML=h;tip.style.display='block';const tw=tip.offsetWidth,th=tip.offsetHeight;let x=sx+16,y=sy+16;if(x+tw>W-8)x=sx-tw-16;if(y+th>H-8)y=sy-th-16;tip.style.left=Math.max(8,x)+'px';tip.style.top=Math.max(8,y)+'px';}
+$('opp').addEventListener('change',()=>{hover.opp=-1;hideTip();requestDraw();});
+function showTip(sx,sy){
+  let h='';const a=aggA,b=aggB;
+  if(st.view==='seat'&&hover.seat>=0){const i=hover.seat,s=seats[i],sec=sections[s.sec];
+    h=`<div class="h">Section ${sec.id}, row ${s.row}, seat ${s.num}</div><div class="sub">${sec.stand}, ${CAT[s.cat].n} at $${CAT[s.cat].p}</div>`;
+    if(a.n===1){const g=[...st.A][0],t=type[g*S+i];h+=`<div class="row"><span>${typeName[t]}</span><b>${t?usd(paid[g*S+i]):''}</b></div>`;}
+    else if(a.n){h+=`<div class="row"><span>Sold</span><b>${a.sold[i]} of ${a.n} games</b></div>`;
+      [1,2,3,4].forEach(t=>{const v=a.tc[i*5+t];if(v)h+=`<div class="row"><span>${typeName[t]}</span><span>${v}</span></div>`;});
+      h+=`<div class="row"><span>Revenue per game</span><b>${usd2(a.rev[i]/a.n)}</b></div>`;
+      if(b&&b.n)h+=`<div class="row"><span>Set B sold</span><b>${b.sold[i]} of ${b.n}</b></div>`;}
+  } else if(st.view==='section'&&hover.sec>=0){const k=hover.sec,sec=sections[k],sa=a.sec[k];
+    h=`<div class="h">Section ${sec.id}</div><div class="sub">${sec.stand}, ${fmt(sec.seats.length)} seats</div>`;
+    if(a.n){const sold=sa.mix[1]+sa.mix[2]+sa.mix[3]+sa.mix[4];
+      h+=`<div class="row"><span>Capacity %</span><b>${pct(sa.cap)}</b></div><div class="row"><span>Avg sold per game</span><b>${fmt(sa.sold/a.n)}</b></div><div class="row"><span>Revenue Per Seat</span><b>${usd2(sa.rps)}</b></div>`;
+      [1,2,3,4].forEach(t=>{if(sa.mix[t])h+=`<div class="row"><span>${typeName[t]}</span><span>${pct(sa.mix[t]/sold)}</span></div>`;});
+      if(b&&b.n){const d=b.sec[k].cap-sa.cap;h+=`<div class="row"><span>Set B Capacity %</span><b>${pct(b.sec[k].cap)} (${d>0?'+':''}${(d*100).toFixed(0)} pts)</b></div>`;}}
+  }
+  if(!h){hideTip();return;}
+  tip.innerHTML=h;tip.style.display='block';
+  const tw=tip.offsetWidth,th=tip.offsetHeight;let x=sx+16,y=sy+16;if(x+tw>W-8)x=sx-tw-16;if(y+th>H-8)y=sy-th-16;tip.style.left=Math.max(8,x)+'px';tip.style.top=Math.max(8,y)+'px';
+}
+function updateHover(sx,sy){
+  if($('opp').checked){const k=opps.findIndex(o=>o.sx!==undefined&&Math.hypot(o.sx-sx,o.sy-sy)<16);
+    if(k>=0){if(hover.opp!==k){hover={seat:-1,sec:-1,opp:k};requestDraw();}showOppTip(k,sx,sy);cv.style.cursor='pointer';return;}
+    if(hover.opp>=0){hover.opp=-1;requestDraw();}cv.style.cursor='';}
+  const [wx,wy]=toWorld(sx,sy);
+  if(st.view==='seat'){const i=seatAt(wx,wy);if(i!==hover.seat){hover.seat=i;requestDraw();}}
+  else{const k=sectionAt(wx,wy);if(k!==hover.sec){hover.sec=k;requestDraw();}}
+  showTip(sx,sy);}
+
+// ---------- pointer: pan, zoom, pinch ----------
+const ptrs=new Map();let dragMoved=false,pinch0=null;
+function zoomAt(f,sx,sy){const nz=Math.max(fitZ*0.7,Math.min(fitZ*14,z*f));const k=nz/z;px=sx-W/2-(sx-W/2-px)*k;py=sy-H/2-(sy-H/2-py)*k;z=nz;requestDraw();}
+cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.offsetX,y:e.offsetY});dragMoved=false;
+  if(ptrs.size===2){const [p,q]=[...ptrs.values()];pinch0={d:Math.hypot(p.x-q.x,p.y-q.y),z};}cv.classList.add('drag');});
+cv.addEventListener('pointermove',e=>{
+  if(!ptrs.has(e.pointerId)){if(e.pointerType==='mouse')updateHover(e.offsetX,e.offsetY);return;}
+  const prev=ptrs.get(e.pointerId);const cur={x:e.offsetX,y:e.offsetY};ptrs.set(e.pointerId,cur);
+  if(ptrs.size===2&&pinch0){const [p,q]=[...ptrs.values()];const d=Math.hypot(p.x-q.x,p.y-q.y);const mx=(p.x+q.x)/2,my=(p.y+q.y)/2;zoomAt((pinch0.z*d/pinch0.d)/z,mx,my);dragMoved=true;hideTip();return;}
+  const dx=cur.x-prev.x,dy=cur.y-prev.y;if(Math.abs(dx)+Math.abs(dy)>0.5){if(!dragMoved&&Math.hypot(dx,dy)<2&&e.pointerType!=='mouse')return;dragMoved=true;px+=dx;py+=dy;hideTip();requestDraw();}
+});
+function endPtr(e){const wasTap=!dragMoved&&ptrs.size===1;ptrs.delete(e.pointerId);if(ptrs.size<2)pinch0=null;if(!ptrs.size)cv.classList.remove('drag');
+  if(wasTap)updateHover(e.offsetX,e.offsetY);}
+cv.addEventListener('pointerup',endPtr);cv.addEventListener('pointercancel',endPtr);
+cv.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse'&&!ptrs.size){hover={seat:-1,sec:-1};hideTip();requestDraw();}});
+cv.addEventListener('wheel',e=>{e.preventDefault();zoomAt(Math.exp(-e.deltaY*0.0018),e.offsetX,e.offsetY);hideTip();},{passive:false});
+$('zin').onclick=()=>zoomAt(1.5,W/2,H/2);$('zout').onclick=()=>zoomAt(1/1.5,W/2,H/2);$('zfit').onclick=fit;
+cv.tabIndex=0;cv.addEventListener('keydown',e=>{const s=40;if(e.key==='+'||e.key==='=')zoomAt(1.3,W/2,H/2);else if(e.key==='-')zoomAt(1/1.3,W/2,H/2);
+  else if(e.key==='ArrowLeft'){px+=s;requestDraw();}else if(e.key==='ArrowRight'){px-=s;requestDraw();}else if(e.key==='ArrowUp'){py+=s;requestDraw();}else if(e.key==='ArrowDown'){py-=s;requestDraw();}else if(e.key==='0')fit();else return;e.preventDefault();});
+
+function setSub(){$('sub').textContent='Prototype with a fictional '+S.toLocaleString('en-US')+'-seat ground and '+(G>16?'three seasons':'season');}
+function rebuild(){
+  const t0=performance.now();loadModel();buildGeo();lastBuild=performance.now()-t0;
+  st.A=new Set(games.map(g=>g.i));st.B=new Set();
+  if(st.cmp){st.A=new Set(games.filter(g=>!g.mid).map(g=>g.i));st.B=new Set(games.filter(g=>g.mid).map(g=>g.i));}
+  hover={seat:-1,sec:-1};hideTip();drawTimes.length=0;setSub();recalc();fit();
+}
+$('sizeSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;opts.size=+b.dataset.s;[...$('sizeSeg').children].forEach(x=>x.setAttribute('aria-pressed',x===b));rebuild();});
+$('yrSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;opts.seasons=+b.dataset.y;[...$('yrSeg').children].forEach(x=>x.setAttribute('aria-pressed',x===b));rebuild();});
+mq.addEventListener('change',e=>{dark=e.matches;P=pal();recalc();});
+new ResizeObserver(resize).observe(stage);
+setSub();
+recalc();resize();fit();
+if(document.fonts)document.fonts.ready.then(requestDraw);
+</script>
+</body>
+</html>
